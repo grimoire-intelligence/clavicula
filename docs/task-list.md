@@ -267,7 +267,7 @@ Implement Solid adapter using createSignal for reactive state and onCleanup for 
 ---
 pr_id: PR-008
 title: Angular Adapter
-cold_state: new
+cold_state: completed
 priority: medium
 complexity:
   score: 3

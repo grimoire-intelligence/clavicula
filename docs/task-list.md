@@ -328,7 +328,7 @@ Write comprehensive README for the core package covering design principles (AI-n
 ---
 pr_id: PR-010
 title: Adapter Tests
-cold_state: new
+cold_state: completed
 priority: medium
 complexity:
   score: 5

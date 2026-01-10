@@ -17,7 +17,7 @@ npm install @grimoire/clavicula-solid
 npm install @grimoire/clavicula-angular
 ```
 
-**Note:** Svelte requires no adapter. Clavicula's `subscribe` contract is Svelte-native.
+**Note:** Svelte requires no adapter. Clavicula's `subscribe` contract is Svelte-native. If you're using Alpine, just use Alpine's store; when you've already paid for its reactivity model, its native store is smaller.
 
 ## Quick Start
 

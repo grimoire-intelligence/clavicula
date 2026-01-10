@@ -55,4 +55,30 @@ describe('useStore (React)', () => {
     const result = useStore(store);
     expect(result.value).toBe('test');
   });
+
+  it('accepts a selector function', () => {
+    const store = createStore({ count: 42, name: 'test' });
+    const count = useStore(store, s => s.count);
+    expect(count).toBe(42);
+  });
+
+  it('selector reflects store updates', () => {
+    const store = createStore({ count: 0 });
+
+    expect(useStore(store, s => s.count)).toBe(0);
+
+    store.set({ count: 100 });
+
+    expect(useStore(store, s => s.count)).toBe(100);
+  });
+
+  it('selector works with derived stores', () => {
+    const store = createStore({ items: [1, 2, 3] });
+    const stats = derived(store, s => ({ count: s.items.length, sum: s.items.reduce((a, b) => a + b, 0) }));
+
+    expect(useStore(stats, s => s.count)).toBe(3);
+    expect(useStore(stats, s => s.sum)).toBe(6);
+
+    stats.destroy();
+  });
 });

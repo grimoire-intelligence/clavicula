@@ -144,7 +144,7 @@ Create hand-written TypeScript declarations for the core library. Include Store 
 ---
 pr_id: PR-004
 title: Core Unit Tests
-cold_state: new
+cold_state: completed
 priority: high
 complexity:
   score: 4

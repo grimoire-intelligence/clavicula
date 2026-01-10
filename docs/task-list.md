@@ -207,7 +207,7 @@ Implement React adapter using useSyncExternalStore for external store subscripti
 ---
 pr_id: PR-006
 title: Vue Adapter
-cold_state: new
+cold_state: completed
 priority: medium
 complexity:
   score: 2

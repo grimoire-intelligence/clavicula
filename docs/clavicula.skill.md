@@ -24,6 +24,15 @@ PERSIST:  withPersist(store, 'key') => store
 
 ---
 
+## Philosophy
+
+1. **EventTarget is enough** — No custom event systems. The browser's primitive is the foundation.
+2. **Stores are values, not behaviors** — No methods on state. Actions live outside the store.
+3. **Subscriptions are caller's responsibility** — The store doesn't track your lifecycle.
+4. **Derived stores must be destroyed** — No magic cleanup. Explicit ownership.
+
+---
+
 ## API Specification
 
 ### createStore

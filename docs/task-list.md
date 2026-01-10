@@ -178,7 +178,7 @@ Write comprehensive unit tests using Vitest for all core functionality. Test cre
 ---
 pr_id: PR-005
 title: React Adapter
-cold_state: new
+cold_state: completed
 priority: medium
 complexity:
   score: 2

@@ -237,7 +237,7 @@ Implement Vue 3 adapter using shallowRef for reactive bindings and onUnmounted f
 ---
 pr_id: PR-007
 title: Solid Adapter
-cold_state: new
+cold_state: completed
 priority: medium
 complexity:
   score: 2

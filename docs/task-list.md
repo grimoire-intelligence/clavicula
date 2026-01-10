@@ -86,7 +86,7 @@ Set up npm workspaces monorepo structure with all five packages. Configure ES mo
 ---
 pr_id: PR-002
 title: Core Store Implementation
-cold_state: new
+cold_state: completed
 priority: high
 complexity:
   score: 4

@@ -23,7 +23,4 @@
   "devDependencies": {
     "vitest": "^3.0.0"
   },
-  "dependencies": {
-    "lemegeton": "file:../../../Gauntlet/repos/lemegeton/lemegeton-0.1.0.tgz"
-  }
 }

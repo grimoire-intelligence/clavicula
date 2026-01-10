@@ -364,7 +364,7 @@ Write unit tests for all framework adapters. Use appropriate testing utilities f
 ---
 pr_id: PR-011
 title: Architecture Documentation and Agent Skill
-cold_state: new
+cold_state: completed
 priority: low
 complexity:
   score: 5

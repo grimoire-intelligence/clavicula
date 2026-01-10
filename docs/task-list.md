@@ -300,7 +300,7 @@ Implement Angular adapter with two functions: toObservable (for async pipe usage
 ---
 pr_id: PR-009
 title: Core README
-cold_state: new
+cold_state: completed
 priority: medium
 complexity:
   score: 3

@@ -1,0 +1,40 @@
+# Lemegeton local state
+.lemegeton/
+
+# Dependencies
+node_modules/
+
+# Testing
+coverage/
+.nyc_output/
+
+# Build artifacts (if any future build step added)
+dist/
+*.tsbuildinfo
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Editor directories and files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Lock files (keep package-lock.json, ignore others if switching managers)
+yarn.lock
+pnpm-lock.yaml

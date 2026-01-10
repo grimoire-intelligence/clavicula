@@ -21,6 +21,7 @@
   },
   "homepage": "https://github.com/grimoire-intelligence/clavicula#readme",
   "devDependencies": {
+    "esbuild": "^0.27.2",
     "vitest": "^3.0.0"
-  },
+  }
 }

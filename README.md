@@ -80,24 +80,36 @@ When an AI assistant encounters Clavicula code, it can:
 - Debug issues using standard browser tools
 - Extend functionality through simple composition
 
-### When to Choose Each Library
+### Memoized Selectors
 
-**Choose Clavicula when:**
-- Building with AI assistance
-- Creating Web Components or vanilla JS applications
-- Needing framework-agnostic state
-- Valuing minimal bundle size
-- Preferring simplicity over features
+Other libraries advertise "atomic selectors with automatic memoization" as a feature requiring special APIs. In Clavicula, this is just `derived`:
 
-**Choose Zustand when:**
-- Already invested in React ecosystem
-- Need built-in middleware (immer, devtools)
-- Want atomic selectors with automatic memoization
+```javascript
+const store = createStore({
+  users: [{ id: 1, name: 'Alice', active: true }, { id: 2, name: 'Bob', active: false }],
+  filter: 'all'
+});
 
-**Choose Redux when:**
-- Large team with established Redux expertise
-- Need time-travel debugging
-- Building enterprise apps with strict patterns
+// Memoized selector: only recomputes when users or filter change
+const visibleUsers = derived(store, s =>
+  s.filter === 'all' ? s.users : s.users.filter(u => u.active)
+);
+
+// Primitive selector: only notifies when count actually changes
+const userCount = derived(store, s => s.users.length);
+
+// Multi-store selector: combines data from multiple sources
+const cartStore = createStore({ items: [] });
+const userStore = createStore({ discount: 0 });
+
+const total = derived([cartStore, userStore], (cart, user) =>
+  cart.items.reduce((sum, i) => sum + i.price, 0) * (1 - user.discount)
+);
+```
+
+Components subscribing to `userCount` won't re-render when a user's name changes—only when the count changes. This is the same optimization other libraries provide through specialized selector APIs, but achieved with the same `derived` function you already know.
+
+The pattern scales to any complexity: derived stores can depend on other derived stores, creating efficient computation graphs where each node only updates when its inputs change.
 
 ## API Reference
 

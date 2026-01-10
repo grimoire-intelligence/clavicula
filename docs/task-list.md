@@ -116,7 +116,7 @@ Implement the core Clavicula library with createStore (EventTarget-backed reacti
 ---
 pr_id: PR-003
 title: Core Type Declarations
-cold_state: new
+cold_state: completed
 priority: high
 complexity:
   score: 3

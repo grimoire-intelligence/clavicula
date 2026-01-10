@@ -1,0 +1,29 @@
+{
+  "name": "clavicula-monorepo",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Minimalist, AI-native, framework-agnostic reactive Javascript store",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/grimoire-intelligence/clavicula.git"
+  },
+  "author": "Grimoire Intelligence",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/grimoire-intelligence/clavicula/issues"
+  },
+  "homepage": "https://github.com/grimoire-intelligence/clavicula#readme",
+  "devDependencies": {
+    "vitest": "^3.0.0"
+  },
+  "dependencies": {
+    "lemegeton": "file:../../../Gauntlet/repos/lemegeton/lemegeton-0.1.0.tgz"
+  }
+}

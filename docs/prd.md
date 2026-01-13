@@ -329,7 +329,7 @@ This is the **complete** API. There are no other methods, options, or behaviors.
 
 Intentionally omitted to maintain a closed vocabulary:
 
-- **No selectors with equality functions** — Use `derived` for computed slices
+- **No dedicated selector API** — `derived(store, s => s.x)` already does the same work without expanding the vocabulary
 - **No middleware system** — Write decorators like `withPersist`
 - **No Redux-style actions/reducers** — Just call `set` with the new state
 - **No devtools integration** — Use browser's Event Listeners panel; stores use `EventTarget`

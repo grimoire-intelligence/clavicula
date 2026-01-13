@@ -9,7 +9,7 @@ import { signal } from '@angular/core';
  */
 export function toObservable(store) {
   return new Observable(subscriber => {
-    subscriber.next(store.get());
+    // subscribe() calls immediately with current value, so no need to emit first
     return store.subscribe(val => subscriber.next(val));
   });
 }

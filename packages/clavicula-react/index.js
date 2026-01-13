@@ -11,5 +11,15 @@ export function useStore(store, selector) {
   const getSnapshot = selector
     ? () => selector(store.get())
     : store.get;
-  return useSyncExternalStore(store.subscribe, getSnapshot, getSnapshot);
+
+  // Wrap subscribe to skip the immediate call (React manages initial state via getSnapshot)
+  const subscribe = (onStoreChange) => {
+    let first = true;
+    return store.subscribe(() => {
+      if (first) { first = false; return; }
+      onStoreChange();
+    });
+  };
+
+  return useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
 }

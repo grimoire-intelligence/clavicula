@@ -22,7 +22,7 @@ npm install @grimoire/clavicula-angular
 ## Quick Start
 
 ```javascript
-import { createStore, derived, withPersist } from '@grimoire/clavicula';
+import { createStore, derived, withPersist, withBatching } from '@grimoire/clavicula';
 
 // Create a store
 const store = createStore({ count: 0, user: null });
@@ -43,6 +43,12 @@ const doubled = derived(store, s => s.count * 2);
 
 // Persistence
 const settings = withPersist(createStore({ theme: 'light' }), 'settings');
+
+// Batching (for vanilla JS/Svelte; React/Vue/Solid batch automatically)
+const batched = withBatching(createStore({ x: 0, y: 0 }));
+batched.set({ x: 1 });
+batched.set({ y: 2 });
+// Subscribers notified once with { x: 1, y: 2 }
 ```
 
 ## Why Clavicula?
@@ -52,7 +58,7 @@ const settings = withPersist(createStore({ theme: 'light' }), 'settings');
 | Aspect | Clavicula | Zustand | Redux |
 |--------|-----------|---------|-------|
 | **Bundle size** | ~1KB | ~2KB | ~10KB+ |
-| **API surface** | 7 items | ~15 items | 50+ items |
+| **API surface** | 8 items | ~15 items | 50+ items |
 | **Learning curve** | Minutes | Hours | Days |
 | **Concepts** | get/set/subscribe | Stores, selectors, middleware | Actions, reducers, dispatch, thunks |
 | **Dependencies** | None (platform only) | None | immer, redux-toolkit recommended |
@@ -66,7 +72,7 @@ const settings = withPersist(createStore({ theme: 'light' }), 'settings');
 
 Modern development increasingly involves AI assistants writing and modifying code. Clavicula is built from the ground up for this reality:
 
-1. **Complete API in context** — The entire library (7 vocabulary items) fits in any LLM's working memory. No hallucinated methods, no invented patterns.
+1. **Complete API in context** — The entire library (8 vocabulary items) fits in any LLM's working memory. No hallucinated methods, no invented patterns.
 
 2. **Platform primitives** — Uses `EventTarget` and `CustomEvent`, which every language model knows from web platform documentation. No proprietary concepts to learn.
 
@@ -113,7 +119,7 @@ The pattern scales to any complexity: derived stores can depend on other derived
 
 ## API Reference
 
-### Complete Vocabulary (7 items)
+### Complete Vocabulary (8 items)
 
 | Export | Type | Description |
 |--------|------|-------------|
@@ -124,6 +130,7 @@ The pattern scales to any complexity: derived stores can depend on other derived
 | `derived(stores, fn)` | function | Create computed store |
 | `derivedStore.destroy()` | method | Cleanup derived subscriptions |
 | `withPersist(store, key)` | function | Add localStorage sync |
+| `withBatching(store)` | function | Batch updates into single notification |
 
 This is the **complete** API. There are no other methods, options, or behaviors.
 
@@ -239,18 +246,60 @@ customElements.define('my-counter', MyCounter);
 
 Intentionally omitted to maintain a closed vocabulary:
 
-- **No selectors with equality functions** — Use `derived` for computed slices
+- **No dedicated selector API** — `derived(store, s => s.x)` already does the same work without expanding the vocabulary
 - **No middleware system** — Write decorators like `withPersist`
 - **No Redux-style actions/reducers** — Just call `set` with the new state
 - **No devtools integration** — Use browser's Event Listeners panel
 - **No immer/immutability helpers** — Spread syntax is sufficient
 - **No async handling** — Call `set` when your promise resolves
 
+## Avoid Monolithic Stores
+
+If your store has more than ~20-30 keys, stop. This is an antipattern regardless of your tech stack—Clavicula just doesn't help you pretend otherwise.
+
+**Why it matters:** Every `set()` broadcasts full state to all subscribers. A 1000-key central store means every update ships 1000 keys to every listener, even if they only care about one.
+
+**The fix:** Separate concerns into multiple smaller stores. If a component needs data from several stores, create a `derived` store:
+
+```javascript
+// Instead of one massive store...
+const appStore = createStore({ user: {...}, cart: {...}, ui: {...}, ... });
+
+// ...separate by domain
+const userStore = createStore({ id: null, name: '', preferences: {} });
+const cartStore = createStore({ items: [], coupon: null });
+const uiStore = createStore({ sidebarOpen: false, theme: 'light' });
+
+// Component needs both? Derive what you need
+const checkoutView = derived([userStore, cartStore], (user, cart) => ({
+  userName: user.name,
+  itemCount: cart.items.length,
+  canCheckout: user.id !== null && cart.items.length > 0
+}));
+```
+
+**Critical:** Derived stores subscribe to their sources. In Web Components, always clean up:
+
+```javascript
+class CheckoutPanel extends HTMLElement {
+  connectedCallback() {
+    this._derived = derived([userStore, cartStore], (u, c) => ({ ... }));
+    this._unsub = this._derived.subscribe(state => this.render(state));
+    this.render(this._derived.get());
+  }
+
+  disconnectedCallback() {
+    this._unsub?.();
+    this._derived?.destroy(); // Essential: prevents memory leak
+  }
+}
+```
+
 ## Packages
 
 | Package | Description |
 |---------|-------------|
-| `@grimoire/clavicula` | Core library: createStore, derived, withPersist |
+| `@grimoire/clavicula` | Core library: createStore, derived, withPersist, withBatching |
 | `@grimoire/clavicula-react` | React adapter: useStore hook |
 | `@grimoire/clavicula-vue` | Vue 3 adapter: useStore composable |
 | `@grimoire/clavicula-solid` | Solid adapter: useStore primitive |

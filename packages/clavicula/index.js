@@ -20,6 +20,7 @@ export function createStore(initial) {
     subscribe(fn) {
       const handler = (e) => fn(e.detail);
       bus.addEventListener('change', handler);
+      fn(state);
       return () => bus.removeEventListener('change', handler);
     }
   };
@@ -54,6 +55,7 @@ export function derived(stores, fn) {
 
     subscribe(fn) {
       listeners.add(fn);
+      fn(value);
       return () => listeners.delete(fn);
     },
 
@@ -85,4 +87,35 @@ export function withPersist(store, key) {
   });
 
   return store;
+}
+
+/**
+ * Decorator that batches multiple synchronous set() calls into a single notification.
+ * Useful for vanilla JS and Svelte; React/Vue/Solid handle their own batching.
+ * @param {Store} store - The store to wrap
+ * @returns {Store} A new store with batched updates
+ */
+export function withBatching(store) {
+  let batching = false;
+  let queued = {};
+
+  return {
+    get: () => ({ ...store.get(), ...queued }),
+
+    subscribe: store.subscribe,
+
+    set(partial) {
+      const current = { ...store.get(), ...queued };
+      const update = typeof partial === 'function' ? partial(current) : partial;
+      queued = { ...queued, ...update };
+      if (!batching) {
+        batching = true;
+        queueMicrotask(() => {
+          store.set(queued);
+          queued = {};
+          batching = false;
+        });
+      }
+    }
+  };
 }

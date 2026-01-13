@@ -52,3 +52,10 @@ export function withPersist<T extends object>(
   store: Store<T>,
   key: string
 ): Store<T>;
+
+// ─────────────────────────────────────────────────────────────
+// Batching
+// ─────────────────────────────────────────────────────────────
+
+/** Batches multiple synchronous set() calls into a single notification */
+export function withBatching<T extends object>(store: Store<T>): Store<T>;

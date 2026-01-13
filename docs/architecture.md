@@ -156,9 +156,9 @@ Eager evaluation:
 
 The tradeoff is slightly more computation. For most applications, derived functions are cheap (filtering, mapping, property access). If computation is expensive, the user should memoize the derivation function.
 
-### Why No Selector System?
+### Why No Dedicated Selector API?
 
-**Decision:** No built-in selector memoization or equality functions.
+**Decision:** No separate selector vocabulary—`derived` already covers the use case.
 
 **Alternatives considered:**
 1. Zustand-style `(state) => state.slice` with auto-memoization
@@ -167,12 +167,14 @@ The tradeoff is slightly more computation. For most applications, derived functi
 
 **Rationale:**
 
-Selector systems add significant complexity:
+A derived store with an identity projection (`derived(store, s => s.x)`) is functionally identical to a memoized selector—it subscribes to the source, runs the projection on every change, and only notifies when `Object.is(prev, next)` returns false.
+
+Adding a separate selector API would duplicate this capability while expanding the vocabulary. Selector systems also tend to accumulate complexity:
 - Memoization cache management
 - Reference equality vs value equality decisions
 - Framework-specific optimizations
 
-Clavicula's answer is simpler: use `derived` for computed slices.
+Clavicula's answer: just use `derived`.
 
 ```javascript
 // Instead of selector memoization:
@@ -190,13 +192,13 @@ This pushes complexity to where it's explicit and debuggable.
 
 | Component | Size (minified + gzipped) |
 |-----------|---------------------------|
-| Core (`createStore`, `derived`, `withPersist`) | ~600 bytes |
-| React adapter | ~100 bytes |
-| Vue adapter | ~120 bytes |
-| Solid adapter | ~90 bytes |
-| Angular adapter | ~150 bytes |
+| Core (`createStore`, `derived`, `withPersist`, `withBatching`) | ~600 bytes |
+| React adapter | ~170 bytes |
+| Vue adapter | ~150 bytes |
+| Solid adapter | ~140 bytes |
+| Angular adapter | ~200 bytes |
 
-Total core + one adapter: **~700 bytes**
+Total core + one adapter: **~770 bytes**
 
 For comparison:
 - Zustand: ~2KB

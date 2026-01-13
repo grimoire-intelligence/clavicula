@@ -16,10 +16,11 @@ bundle_size: ~1KB
 ## Quick Reference
 
 ```
-IMPORTS:  import { createStore, derived, withPersist } from '@grimoire/clavicula';
+IMPORTS:  import { createStore, derived, withPersist, withBatching } from '@grimoire/clavicula';
 STORE:    store.get() | store.set(partial) | store.subscribe(fn) => unsubscribe
 DERIVED:  derivedStore.get() | derivedStore.subscribe(fn) | derivedStore.destroy()
 PERSIST:  withPersist(store, 'key') => store
+BATCHING: withBatching(store) => store (coalesces synchronous sets)
 ```
 
 ---
@@ -263,6 +264,43 @@ const settings = withPersist(
 - Saves to localStorage on every `set`
 - Handles parse errors gracefully (warns to console)
 - Returns same store reference (chainable)
+
+---
+
+### withBatching
+
+Batches multiple synchronous set() calls into a single subscriber notification.
+
+```typescript
+function withBatching<T extends object>(store: Store<T>): Store<T>
+```
+
+**Parameters:**
+- `store` (Store): The store to wrap
+
+**Returns:** A new store with batched updates
+
+**Example:**
+```javascript
+const store = withBatching(createStore({ x: 0, y: 0 }));
+
+store.set({ x: 1 });
+store.set({ y: 2 });
+store.set(s => ({ x: s.x + 10 }));
+// Subscribers notified once with { x: 11, y: 2 }
+```
+
+**Behavior:**
+- Queues updates until next microtask
+- Merges all queued partials into single set
+- `get()` returns pending changes (set-then-get works)
+- Function partials see accumulated state
+- Useful for vanilla JS and Svelte (React/Vue/Solid batch automatically)
+
+**When to use:**
+- Multiple rapid updates in event handlers
+- Batch updates from async operations
+- Reduce subscriber spam in animation loops
 
 ---
 
@@ -517,6 +555,55 @@ const prefsStore = createStore({ theme: 'light' });
 prefsStore.set({ theme: 'dark' }); // Simple
 ```
 
+### Mistake: Monolithic Store with Many Keys
+
+```javascript
+// WRONG: Every set() broadcasts all 50+ keys to every subscriber
+const appStore = createStore({
+  user: { id: 1, name: 'Alice', email: '...' },
+  cart: { items: [], total: 0 },
+  ui: { sidebarOpen: false, modal: null },
+  settings: { theme: 'light', language: 'en' },
+  // ... 40 more keys
+});
+
+// CORRECT: Separate by domain, derive when needed
+const userStore = createStore({ id: 1, name: 'Alice' });
+const cartStore = createStore({ items: [], total: 0 });
+const uiStore = createStore({ sidebarOpen: false });
+
+// Component needs multiple? Create focused derived store
+const headerData = derived([userStore, cartStore], (user, cart) => ({
+  userName: user.name,
+  cartCount: cart.items.length
+}));
+```
+
+**Why:** Every `set()` broadcasts full state to all subscribers. Monolithic stores are an antipattern regardless of tech stack—Clavicula just doesn't hide the cost.
+
+**Rule of thumb:** If your store exceeds ~20-30 keys, split it.
+
+### Mistake: Forgetting destroy() on Dynamic Derived Stores
+
+```javascript
+// WRONG: Derived store leaks, keeps listening to sources forever
+class MyComponent extends HTMLElement {
+  connectedCallback() {
+    this._view = derived([storeA, storeB], (a, b) => ({ ... }));
+    this._unsub = this._view.subscribe(s => this.render(s));
+  }
+  disconnectedCallback() {
+    this._unsub?.(); // Only unsubscribes from derived, doesn't stop derived listening to sources!
+  }
+}
+
+// CORRECT: Call destroy() to clean up derived's subscriptions to source stores
+disconnectedCallback() {
+  this._unsub?.();
+  this._view?.destroy(); // Stops derived from listening to storeA and storeB
+}
+```
+
 ---
 
 ## Type Definitions Summary
@@ -550,13 +637,15 @@ function withPersist<T extends object>(
   store: Store<T>,
   key: string
 ): Store<T>;
+
+function withBatching<T extends object>(store: Store<T>): Store<T>;
 ```
 
 ---
 
 ## Vocabulary Checklist
 
-When writing Clavicula code, verify you're only using these 7 items:
+When writing Clavicula code, verify you're only using these 8 items:
 
 1. `createStore(initial)` - create store
 2. `store.get()` - read state
@@ -565,5 +654,6 @@ When writing Clavicula code, verify you're only using these 7 items:
 5. `derived(stores, fn)` - create computed store
 6. `derivedStore.destroy()` - cleanup derived
 7. `withPersist(store, key)` - add persistence
+8. `withBatching(store)` - batch updates
 
 If you're reaching for something not in this list, reconsider the approach.

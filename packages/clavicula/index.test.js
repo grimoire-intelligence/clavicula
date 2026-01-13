@@ -156,6 +156,36 @@ describe('derived', () => {
       base.set({ x: 3 });
       expect(listener).toHaveBeenCalledTimes(2); // Still 2
     });
+
+    it('accepts custom equality function for arrays', () => {
+      const base = createStore({ items: ['a', 'b'] });
+      const shallowArrayEqual = (a, b) =>
+        Array.isArray(a) && Array.isArray(b) &&
+        a.length === b.length &&
+        a.every((v, i) => v === b[i]);
+
+      const filtered = derived(
+        base,
+        s => s.items.filter(i => i !== 'x'),
+        shallowArrayEqual
+      );
+      const listener = vi.fn();
+
+      filtered.subscribe(listener);
+      expect(listener).toHaveBeenCalledTimes(1); // initial
+
+      // This creates a new array reference but same contents
+      base.set({ items: ['a', 'b'] });
+
+      // With shallowArrayEqual, no notification (contents identical)
+      expect(listener).toHaveBeenCalledTimes(1);
+
+      // Actually change contents
+      base.set({ items: ['a', 'b', 'c'] });
+      expect(listener).toHaveBeenCalledTimes(2);
+
+      filtered.destroy();
+    });
   });
 
   describe('multiple dependencies', () => {

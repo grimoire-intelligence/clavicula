@@ -30,9 +30,10 @@ export function createStore(initial) {
  * Creates a read-only store whose value is computed from one or more source stores.
  * @param {Store|Store[]} stores - One or more source stores
  * @param {Function} fn - Derivation function receiving current values of all source stores
+ * @param {Function} [isEqual=Object.is] - Equality function to prevent spurious notifications
  * @returns {DerivedStore} DerivedStore with get(), subscribe(), destroy() methods
  */
-export function derived(stores, fn) {
+export function derived(stores, fn, isEqual = Object.is) {
   const deps = Array.isArray(stores) ? stores : [stores];
   const listeners = new Set();
   const unsubs = [];
@@ -42,7 +43,7 @@ export function derived(stores, fn) {
   deps.forEach(store => {
     const unsub = store.subscribe(() => {
       const next = fn(...deps.map(s => s.get()));
-      if (!Object.is(value, next)) {
+      if (!isEqual(value, next)) {
         value = next;
         listeners.forEach(l => l(value));
       }

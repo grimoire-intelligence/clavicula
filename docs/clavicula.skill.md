@@ -146,19 +146,22 @@ Creates a read-only store computed from one or more source stores.
 // Single store
 function derived<S extends object, T>(
   store: Store<S>,
-  fn: (state: S) => T
+  fn: (state: S) => T,
+  isEqual?: (a: T, b: T) => boolean
 ): DerivedStore<T>
 
 // Multiple stores
 function derived<S extends object[], T>(
   stores: Store<S[number]>[],
-  fn: (...states: S) => T
+  fn: (...states: S) => T,
+  isEqual?: (a: T, b: T) => boolean
 ): DerivedStore<T>
 ```
 
 **Parameters:**
 - `stores` (Store | Store[]): One or more source stores
 - `fn` (function): Derivation function. Receives current values, returns derived value.
+- `isEqual` (function, optional): Equality function. Defaults to `Object.is`.
 
 **Returns:** DerivedStore with `get`, `subscribe`, `destroy` methods
 
@@ -172,13 +175,25 @@ const total = derived(
   [cartStore, taxStore],
   (cart, tax) => cart.subtotal * (1 + tax.rate)
 );
+
+// Custom equality for filtered arrays
+const shallowArrayEqual = (a, b) =>
+  a.length === b.length && a.every((v, i) => v === b[i]);
+
+const activeItems = derived(
+  store,
+  s => s.items.filter(i => i.active),
+  shallowArrayEqual
+);
 ```
 
 **Behavior:**
 - Computed eagerly (value always current)
-- Uses `Object.is` to skip spurious notifications
+- Uses `isEqual` (default: `Object.is`) to skip spurious notifications
 - Notifies only when derived value changes
 - Must call `destroy()` when no longer needed
+
+**Note:** Filtered arrays always create new references, so `Object.is` returns false even when contents match. Pass a shallow equality function for array-returning derivations.
 
 ---
 

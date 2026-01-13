@@ -34,13 +34,15 @@ export interface DerivedStore<T> {
 /** Creates a read-only store computed from one source store */
 export function derived<S extends object, T>(
   store: Store<S>,
-  fn: (state: S) => T
+  fn: (state: S) => T,
+  isEqual?: (a: T, b: T) => boolean
 ): DerivedStore<T>;
 
 /** Creates a read-only store computed from multiple source stores */
 export function derived<S extends object[], T>(
   stores: { [K in keyof S]: Store<S[K]> },
-  fn: (...states: S) => T
+  fn: (...states: S) => T,
+  isEqual?: (a: T, b: T) => boolean
 ): DerivedStore<T>;
 
 // ─────────────────────────────────────────────────────────────

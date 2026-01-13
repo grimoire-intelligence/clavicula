@@ -115,6 +115,19 @@ const total = derived([cartStore, userStore], (cart, user) =>
 
 Components subscribing to `userCount` won't re-render when a user's name changes—only when the count changes. This is the same optimization other libraries provide through specialized selector APIs, but achieved with the same `derived` function you already know.
 
+**Note on filtered arrays:** By default, `derived` uses `Object.is` for equality, which compares by reference. Filtered arrays always create new references, so subscribers get notified even when contents are identical. For array-returning derivations, pass a custom equality function:
+
+```javascript
+const shallowArrayEqual = (a, b) =>
+  a.length === b.length && a.every((v, i) => v === b[i]);
+
+const activeUsers = derived(
+  store,
+  s => s.users.filter(u => u.active),
+  shallowArrayEqual
+);
+```
+
 The pattern scales to any complexity: derived stores can depend on other derived stores, creating efficient computation graphs where each node only updates when its inputs change.
 
 ## API Reference
@@ -127,7 +140,7 @@ The pattern scales to any complexity: derived stores can depend on other derived
 | `store.get()` | method | Read current state |
 | `store.set(partial)` | method | Update state |
 | `store.subscribe(fn)` | method | Listen for changes, returns unsubscribe |
-| `derived(stores, fn)` | function | Create computed store |
+| `derived(stores, fn, isEqual?)` | function | Create computed store |
 | `derivedStore.destroy()` | method | Cleanup derived subscriptions |
 | `withPersist(store, key)` | function | Add localStorage sync |
 | `withBatching(store)` | function | Batch updates into single notification |

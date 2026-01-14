@@ -38,12 +38,28 @@ export function withPersist(store, key) {
 // ─────────────────────────────────────────────────────────────
 
 /**
+ * Shallow equality check for objects.
+ * @param {object} a
+ * @param {object} b
+ * @returns {boolean}
+ */
+function shallowEqual(a, b) {
+  if (a === b) return true;
+  const keysA = Object.keys(a);
+  const keysB = Object.keys(b);
+  if (keysA.length !== keysB.length) return false;
+  return keysA.every(k => Object.is(a[k], b[k]));
+}
+
+/**
  * Decorator that batches multiple synchronous set() calls into a single notification.
+ * Also filters out no-op updates via equality checking (like derived() does).
  * Useful for vanilla JS and Svelte; React/Vue/Solid handle their own batching.
  * @param {import('@grimoire/clavicula').Store} store - The store to wrap
- * @returns {import('@grimoire/clavicula').Store} A new store with batched updates
+ * @param {function} [isEqual=shallowEqual] - Equality function; pass () => false to disable filtering
+ * @returns {import('@grimoire/clavicula').Store} A new store with batched, distinct updates
  */
-export function withBatching(store) {
+export function withBatching(store, isEqual = shallowEqual) {
   let batching = false;
   let queued = {};
 
@@ -59,52 +75,14 @@ export function withBatching(store) {
       if (!batching) {
         batching = true;
         queueMicrotask(() => {
-          const final = { ...store.get(), ...queued };
-          store.set(final);
+          const prev = store.get();
+          const final = { ...prev, ...queued };
+          if (!isEqual(prev, final)) {
+            store.set(final);
+          }
           queued = {};
           batching = false;
         });
-      }
-    }
-  };
-}
-
-// ─────────────────────────────────────────────────────────────
-// withDistinct
-// ─────────────────────────────────────────────────────────────
-
-/**
- * Shallow equality check for objects.
- * @param {object} a
- * @param {object} b
- * @returns {boolean}
- */
-function shallowEqual(a, b) {
-  if (a === b) return true;
-  const keysA = Object.keys(a);
-  const keysB = Object.keys(b);
-  if (keysA.length !== keysB.length) return false;
-  return keysA.every(k => Object.is(a[k], b[k]));
-}
-
-/**
- * Decorator that blocks set() calls when new state shallow-equals current state.
- * Reduces event spam from redundant updates.
- * @param {import('@grimoire/clavicula').Store} store - The store to wrap
- * @param {function} [isEqual=shallowEqual] - Custom equality function
- * @returns {import('@grimoire/clavicula').Store} A new store with distinct updates only
- */
-export function withDistinct(store, isEqual = shallowEqual) {
-  return {
-    get: store.get,
-    subscribe: store.subscribe,
-    set(partial) {
-      const current = store.get();
-      const next = typeof partial === 'function'
-        ? { ...current, ...partial(current) }
-        : { ...current, ...partial };
-      if (!isEqual(current, next)) {
-        store.set(next);
       }
     }
   };

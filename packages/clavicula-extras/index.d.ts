@@ -14,15 +14,10 @@ export function withPersist<T extends object>(
 // withBatching
 // ─────────────────────────────────────────────────────────────
 
-/** Batches multiple synchronous set() calls into a single notification */
-export function withBatching<T extends object>(store: Store<T>): Store<T>;
-
-// ─────────────────────────────────────────────────────────────
-// withDistinct
-// ─────────────────────────────────────────────────────────────
-
-/** Blocks set() calls when new state equals current state (shallow by default) */
-export function withDistinct<T extends object>(
+/** Batches multiple synchronous set() calls into a single notification.
+ *  Also filters out no-op updates via equality checking (like derived() does).
+ *  Pass `() => false` as isEqual to disable filtering. */
+export function withBatching<T extends object>(
   store: Store<T>,
   isEqual?: (a: T, b: T) => boolean
 ): Store<T>;

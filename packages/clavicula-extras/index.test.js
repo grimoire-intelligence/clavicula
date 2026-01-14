@@ -3,7 +3,6 @@ import { createStore } from '@grimoire/clavicula';
 import {
   withPersist,
   withBatching,
-  withDistinct,
   withFreeze,
   withReset,
   withLogging,
@@ -180,64 +179,58 @@ describe('withBatching', () => {
 
     expect(listener).toHaveBeenCalledTimes(3); // initial + 2 batches
   });
-});
 
-// ─────────────────────────────────────────────────────────────
-// withDistinct
-// ─────────────────────────────────────────────────────────────
-
-describe('withDistinct', () => {
-  it('allows updates when values differ', () => {
-    const store = withDistinct(createStore({ x: 1, y: 2 }));
-    const listener = vi.fn();
-    store.subscribe(listener);
-
-    store.set({ x: 10 });
-
-    expect(listener).toHaveBeenCalledTimes(2); // initial + update
-    expect(store.get()).toEqual({ x: 10, y: 2 });
-  });
-
-  it('blocks updates when values are shallowly equal', () => {
+  it('blocks updates when batched result equals current state', async () => {
     const base = createStore({ x: 1, y: 2 });
-    const store = withDistinct(base);
+    const store = withBatching(base);
     const listener = vi.fn();
     base.subscribe(listener);
 
     store.set({ x: 1 }); // same value
 
-    expect(listener).toHaveBeenCalledTimes(1); // only initial
+    await Promise.resolve();
+
+    expect(listener).toHaveBeenCalledTimes(1); // only initial, blocked
   });
 
-  it('detects changes in number of keys', () => {
+  it('detects changes in number of keys', async () => {
     const base = createStore({ x: 1 });
-    const store = withDistinct(base);
+    const store = withBatching(base);
     const listener = vi.fn();
     base.subscribe(listener);
 
     store.set({ x: 1, y: 2 }); // adding key
 
+    await Promise.resolve();
+
     expect(listener).toHaveBeenCalledTimes(2); // initial + update
   });
 
-  it('supports function partials', () => {
-    const store = withDistinct(createStore({ count: 5 }));
-
-    store.set(s => ({ count: s.count })); // no change
-
-    expect(store.get().count).toBe(5);
-  });
-
-  it('supports custom equality function', () => {
+  it('supports custom equality function', async () => {
     const base = createStore({ items: [1, 2, 3] });
     const arrayEqual = (a, b) => JSON.stringify(a) === JSON.stringify(b);
-    const store = withDistinct(base, arrayEqual);
+    const store = withBatching(base, arrayEqual);
     const listener = vi.fn();
     base.subscribe(listener);
 
     store.set({ items: [1, 2, 3] }); // same array contents
 
+    await Promise.resolve();
+
     expect(listener).toHaveBeenCalledTimes(1); // only initial, blocked
+  });
+
+  it('can disable equality checking with () => false', async () => {
+    const base = createStore({ x: 1 });
+    const store = withBatching(base, () => false);
+    const listener = vi.fn();
+    base.subscribe(listener);
+
+    store.set({ x: 1 }); // same value, but forced through
+
+    await Promise.resolve();
+
+    expect(listener).toHaveBeenCalledTimes(2); // initial + update (not blocked)
   });
 });
 
@@ -464,18 +457,19 @@ describe('withHistory', () => {
 // ─────────────────────────────────────────────────────────────
 
 describe('decorator composition', () => {
-  it('withDistinct + withBatching', async () => {
+  it('withBatching + withHistory', async () => {
     const base = createStore({ x: 0 });
-    const store = withDistinct(withBatching(base));
+    const store = withBatching(withHistory(base));
     const listener = vi.fn();
     base.subscribe(listener);
 
     store.set({ x: 1 });
-    store.set({ x: 1 }); // duplicate
+    store.set({ x: 2 });
 
     await Promise.resolve();
 
-    expect(listener).toHaveBeenCalledTimes(2); // initial + batched (distinct blocks duplicate)
+    expect(listener).toHaveBeenCalledTimes(2); // initial + batched
+    expect(base.get().x).toBe(2);
   });
 
   it('withFreeze + withHistory', () => {

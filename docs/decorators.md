@@ -46,7 +46,7 @@ Examples: `withLogging`, `withPersist`
 Intercept operations by returning a new object that delegates to the original.
 
 ```javascript
-function withDistinct(store, isEqual = shallowEqual) {
+function withValidation(store, validate) {
   return {
     get: store.get,          // Delegate directly
     subscribe: store.subscribe,
@@ -55,7 +55,7 @@ function withDistinct(store, isEqual = shallowEqual) {
       const next = typeof partial === 'function'
         ? { ...current, ...partial(current) }
         : { ...current, ...partial };
-      if (!isEqual(current, next)) {
+      if (validate(next)) {
         store.set(next);     // Pass computed next, not partial
       }
     }
@@ -68,7 +68,7 @@ Use when:
 - Intercepting `get()` to transform returned state
 - Intercepting `subscribe()` to filter or batch notifications
 
-Examples: `withDistinct`, `withFreeze` (dev only), `withBatching`
+Examples: `withFreeze` (dev only), `withBatching`
 
 ### Pattern 3: Extended
 
@@ -131,43 +131,31 @@ set(partial) {
 
 ### Composition Order Matters
 
-Decorators wrap in layers—outer decorators intercept calls first, inner decorators are closest to the real store. Order changes behavior:
-
-**`withDistinct(withBatching(store))`:**
-- Each `set()` hits withDistinct first
-- Equality check on every individual call
-- Only differing updates reach withBatching
-
-**`withBatching(withDistinct(store))`:**
-- All `set()` calls queue in withBatching
-- After microtask, one merged update hits withDistinct
-- Single equality check for the whole batch (more efficient)
+Decorators wrap in layers—outer decorators intercept calls first, inner decorators are closest to the real store. Order changes behavior.
 
 **Recommended order (outermost → innermost):**
 
-1. **Batching** (`withBatching`) — Collect updates before anything else
-2. **Filtering** (`withDistinct`) — Check the batched result once
-3. **History** (`withHistory`) — Track meaningful state changes
-4. **Validation/Transform** (`withFreeze`, dev only) — Process final state
-5. **Side effects** (`withLogging`, `withPersist`) — Observe final state
+1. **Batching** (`withBatching`) — Collect and dedupe updates before anything else
+2. **History** (`withHistory`) — Track meaningful state changes
+3. **Validation/Transform** (`withFreeze`, dev only) — Process final state
+4. **Side effects** (`withLogging`, `withPersist`) — Observe final state
 
 ```javascript
 withBatching(
-  withDistinct(
-    withHistory(
-      withFreeze(
-        withLogging(store, 'myStore')
-      )
+  withHistory(
+    withFreeze(
+      withLogging(store, 'myStore')
     )
   )
 )
 ```
 
 **Why this order:**
-- Batching first = fewer downstream operations
-- Distinct after batching = one check per batch, not per call
-- History after filtering = only track meaningful changes
+- Batching first = collects multiple synchronous `set()` calls, then checks equality once per batch (like `derived()` does)
+- History after batching = only track meaningful, deduplicated changes
 - Side effects last = they see the actual stored state
+
+**Note:** `withBatching` now includes built-in equality checking (shallow by default). Pass a custom equality function as the second argument, or `() => false` to disable filtering.
 
 ### withPersist Requires Protection
 
@@ -175,7 +163,7 @@ withBatching(
 - Rapidly changing state (e.g., drag position, form input)
 - Large objects (localStorage is synchronous, blocks main thread)
 
-**Always wrap with batching and distinct first:**
+**Always wrap with batching first:**
 
 ```javascript
 // WRONG: Writes to localStorage on every keystroke
@@ -183,14 +171,12 @@ const formStore = withPersist(createStore({ text: '' }), 'form');
 
 // RIGHT: Batches and dedupes before persisting
 const formStore = withPersist(
-  withBatching(
-    withDistinct(createStore({ text: '' }))
-  ),
+  withBatching(createStore({ text: '' })),
   'form'
 );
 ```
 
-Note: `withPersist` must be **outermost** because it uses `subscribe()` internally. If placed inside other wrappers, it subscribes to the inner store directly, bypassing batching/distinct.
+Note: `withPersist` must be **outermost** because it uses `subscribe()` internally. If placed inside other wrappers, it subscribes to the inner store directly, bypassing batching.
 
 ### Keep It Minimal
 
@@ -201,7 +187,7 @@ Each decorator should do one thing. If you're adding multiple features, split th
 function withEverything(store) { ... }
 
 // RIGHT: Compose single-purpose decorators
-withHistory(withFreeze(withDistinct(store)))
+withBatching(withHistory(withFreeze(store)))
 ```
 
 ### Handle Edge Cases

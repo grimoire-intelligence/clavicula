@@ -33,13 +33,14 @@ describe('useStore (React)', () => {
     expect(useStore(store)).toEqual({ count: 10 });
   });
 
-  it('works with derived stores', () => {
+  it('works with derived stores', async () => {
     const store = createStore({ x: 2 });
     const doubled = derived(store, s => s.x * 2);
 
     expect(useStore(doubled)).toBe(4);
 
     store.set({ x: 5 });
+    await Promise.resolve();
     expect(useStore(doubled)).toBe(10);
 
     doubled.destroy();

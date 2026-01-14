@@ -69,7 +69,7 @@ describe('toObservable (Angular)', () => {
     expect(values).toEqual([{ x: 1 }, { x: 2 }]);
   });
 
-  it('works with derived stores', () => {
+  it('works with derived stores', async () => {
     const store = createStore({ items: ['a', 'b'] });
     const count = derived(store, s => s.items.length);
 
@@ -78,6 +78,7 @@ describe('toObservable (Angular)', () => {
     obs.subscribe(v => values.push(v));
 
     store.set({ items: ['a', 'b', 'c'] });
+    await Promise.resolve();
 
     expect(values).toEqual([2, 3]);
 
@@ -121,7 +122,7 @@ describe('toSignal (Angular)', () => {
     expect(signal()).toEqual(lastValue);
   });
 
-  it('works with derived stores', () => {
+  it('works with derived stores', async () => {
     const store = createStore({ price: 100 });
     const doubled = derived(store, s => s.price * 2);
 
@@ -130,6 +131,7 @@ describe('toSignal (Angular)', () => {
     expect(signal()).toBe(200);
 
     store.set({ price: 50 });
+    await Promise.resolve();
     expect(signal()).toBe(100);
 
     destroy();

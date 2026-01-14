@@ -66,7 +66,7 @@ describe('useStore (Solid)', () => {
     expect(state()).toEqual(lastValue);
   });
 
-  it('works with derived stores', () => {
+  it('works with derived stores', async () => {
     const store = createStore({ name: 'Alice' });
     const upperName = derived(store, s => s.name.toUpperCase());
 
@@ -74,6 +74,7 @@ describe('useStore (Solid)', () => {
     expect(state()).toBe('ALICE');
 
     store.set({ name: 'Bob' });
+    await Promise.resolve();
     expect(state()).toBe('BOB');
 
     upperName.destroy();

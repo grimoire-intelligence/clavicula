@@ -98,11 +98,12 @@ describe('derived', () => {
       expect(sum.get()).toBe(3);
     });
 
-    it('updates when source store changes', () => {
+    it('updates when source store changes', async () => {
       const base = createStore({ a: 1, b: 2 });
       const sum = derived(base, s => s.a + s.b);
 
       base.set({ a: 10 });
+      await Promise.resolve();
       expect(sum.get()).toBe(12);
     });
 
@@ -117,19 +118,20 @@ describe('derived', () => {
       expect(listener).toHaveBeenCalledWith(2);
     });
 
-    it('notifies subscribers when derived value changes', () => {
+    it('notifies subscribers when derived value changes', async () => {
       const base = createStore({ x: 1 });
       const doubled = derived(base, s => s.x * 2);
       const listener = vi.fn();
 
       doubled.subscribe(listener);
       base.set({ x: 5 });
+      await Promise.resolve();
 
       expect(listener).toHaveBeenCalledTimes(2); // initial + change
       expect(listener).toHaveBeenLastCalledWith(10);
     });
 
-    it('does not notify when derived value is unchanged (Object.is check)', () => {
+    it('does not notify when derived value is unchanged (Object.is check)', async () => {
       const base = createStore({ x: 1, y: 2 });
       const xOnly = derived(base, s => s.x);
       const listener = vi.fn();
@@ -138,26 +140,29 @@ describe('derived', () => {
 
       // Change y but not x
       base.set({ y: 100 });
+      await Promise.resolve();
 
       expect(listener).toHaveBeenCalledTimes(1); // Only initial call
       expect(xOnly.get()).toBe(1);
     });
 
-    it('supports unsubscribe from derived store', () => {
+    it('supports unsubscribe from derived store', async () => {
       const base = createStore({ x: 1 });
       const doubled = derived(base, s => s.x * 2);
       const listener = vi.fn();
 
       const unsub = doubled.subscribe(listener);
       base.set({ x: 2 });
+      await Promise.resolve();
       expect(listener).toHaveBeenCalledTimes(2); // initial + change
 
       unsub();
       base.set({ x: 3 });
+      await Promise.resolve();
       expect(listener).toHaveBeenCalledTimes(2); // Still 2
     });
 
-    it('accepts custom equality function for arrays', () => {
+    it('accepts custom equality function for arrays', async () => {
       const base = createStore({ items: ['a', 'b'] });
       const shallowArrayEqual = (a, b) =>
         Array.isArray(a) && Array.isArray(b) &&
@@ -176,12 +181,14 @@ describe('derived', () => {
 
       // This creates a new array reference but same contents
       base.set({ items: ['a', 'b'] });
+      await Promise.resolve();
 
       // With shallowArrayEqual, no notification (contents identical)
       expect(listener).toHaveBeenCalledTimes(1);
 
       // Actually change contents
       base.set({ items: ['a', 'b', 'c'] });
+      await Promise.resolve();
       expect(listener).toHaveBeenCalledTimes(2);
 
       filtered.destroy();
@@ -197,19 +204,21 @@ describe('derived', () => {
       expect(combined.get()).toBe(3);
     });
 
-    it('updates when any source store changes', () => {
+    it('updates when any source store changes', async () => {
       const store1 = createStore({ a: 1 });
       const store2 = createStore({ b: 2 });
       const combined = derived([store1, store2], (s1, s2) => s1.a + s2.b);
 
       store1.set({ a: 10 });
+      await Promise.resolve();
       expect(combined.get()).toBe(12);
 
       store2.set({ b: 20 });
+      await Promise.resolve();
       expect(combined.get()).toBe(30);
     });
 
-    it('notifies subscribers when any dependency changes value', () => {
+    it('notifies subscribers when any dependency changes value', async () => {
       const store1 = createStore({ a: 1 });
       const store2 = createStore({ b: 2 });
       const combined = derived([store1, store2], (s1, s2) => s1.a + s2.b);
@@ -219,17 +228,39 @@ describe('derived', () => {
       expect(listener).toHaveBeenCalledTimes(1); // initial
 
       store1.set({ a: 5 });
+      await Promise.resolve();
       expect(listener).toHaveBeenCalledTimes(2);
       expect(listener).toHaveBeenLastCalledWith(7);
 
       store2.set({ b: 10 });
+      await Promise.resolve();
       expect(listener).toHaveBeenCalledTimes(3);
       expect(listener).toHaveBeenLastCalledWith(15);
+    });
+
+    it('batches multiple synchronous updates into single recomputation', async () => {
+      const store1 = createStore({ a: 0 });
+      const store2 = createStore({ b: 0 });
+      const fn = vi.fn((s1, s2) => s1.a + s2.b);
+      const combined = derived([store1, store2], fn);
+
+      expect(fn).toHaveBeenCalledTimes(1); // initial
+
+      store1.set({ a: 1 });
+      store2.set({ b: 2 });
+      store1.set({ a: 10 });
+
+      expect(fn).toHaveBeenCalledTimes(1); // still just initial, batched
+
+      await Promise.resolve();
+
+      expect(fn).toHaveBeenCalledTimes(2); // initial + one batched recompute
+      expect(combined.get()).toBe(12);
     });
   });
 
   describe('destroy()', () => {
-    it('cleans up subscriptions to source stores', () => {
+    it('cleans up subscriptions to source stores', async () => {
       const base = createStore({ x: 1 });
       const doubled = derived(base, s => s.x * 2);
       const listener = vi.fn();
@@ -240,6 +271,7 @@ describe('derived', () => {
       doubled.destroy();
 
       base.set({ x: 100 });
+      await Promise.resolve();
 
       // After destroy, updates should not propagate
       expect(listener).toHaveBeenCalledTimes(1); // Still just initial
@@ -247,7 +279,7 @@ describe('derived', () => {
       expect(doubled.get()).toBe(2);
     });
 
-    it('clears all derived store listeners', () => {
+    it('clears all derived store listeners', async () => {
       const base = createStore({ x: 1 });
       const doubled = derived(base, s => s.x * 2);
       const listener1 = vi.fn();
@@ -263,6 +295,7 @@ describe('derived', () => {
       doubled.destroy();
 
       base.set({ x: 100 });
+      await Promise.resolve();
 
       // After destroy, no more calls
       expect(listener1).toHaveBeenCalledTimes(1);

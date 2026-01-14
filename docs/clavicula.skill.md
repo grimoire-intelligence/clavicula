@@ -188,7 +188,7 @@ const activeItems = derived(
 ```
 
 **Behavior:**
-- Computed eagerly (value always current)
+- Batches multiple synchronous source updates into a single recomputation
 - Uses `isEqual` (default: `Object.is`) to skip spurious notifications
 - Notifies only when derived value changes
 - Must call `destroy()` when no longer needed
@@ -312,8 +312,8 @@ store.set(s => ({ x: s.x + 10 }));
 **Behavior:**
 - Queues updates until next microtask
 - Merges all queued partials into single set
-- `get()` returns pending changes (set-then-get works)
-- Function partials see accumulated state
+- `get()` returns committed value (not optimistic/pending)
+- Function partials see accumulated queued state
 - Useful for vanilla JS and Svelte (React/Vue/Solid batch automatically)
 
 **When to use:**
@@ -669,7 +669,6 @@ function withHistory<T extends object>(store: Store<T>, maxSize?: number): Store
   canUndo(): boolean;
   canRedo(): boolean;
 };
-function batchedDerived<S, T>(store: Subscribable<S>, fn: (state: S) => T): DerivedStore<T>;
 ```
 
 ---
@@ -688,12 +687,11 @@ function batchedDerived<S, T>(store: Subscribable<S>, fn: (state: S) => T): Deri
 ### Extras (import from `@grimoire/clavicula-extras`)
 
 - `withPersist(store, key)` - localStorage sync
-- `withBatching(store)` - batch updates
+- `withBatching(store)` - batch store updates
 - `withDistinct(store)` - block redundant updates
-- `withFreeze(store)` - freeze state
+- `withFreeze(store)` - freeze state (dev only)
 - `withReset(store)` - add reset()
 - `withLogging(store)` - console logging
 - `withHistory(store)` - undo/redo
-- `batchedDerived(stores, fn)` - batched derived store
 
 Core is all you need. Extras are opt-in for specific use cases.

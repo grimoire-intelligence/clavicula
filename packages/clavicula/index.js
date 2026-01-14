@@ -37,22 +37,29 @@ export function derived(stores, fn, isEqual = Object.is) {
   const deps = Array.isArray(stores) ? stores : [stores];
   const listeners = new Set();
   const unsubs = [];
+  let pending = false;
   let initializing = true;
-
-  let value = fn(...deps.map(s => s.get()));
+  let value;
 
   deps.forEach(store => {
     const unsub = store.subscribe(() => {
       if (initializing) return;
-      const next = fn(...deps.map(s => s.get()));
-      if (!isEqual(value, next)) {
-        value = next;
-        listeners.forEach(l => l(value));
+      if (!pending) {
+        pending = true;
+        queueMicrotask(() => {
+          pending = false;
+          const next = fn(...deps.map(s => s.get()));
+          if (!isEqual(value, next)) {
+            value = next;
+            listeners.forEach(l => l(value));
+          }
+        });
       }
     });
     unsubs.push(unsub);
   });
 
+  value = fn(...deps.map(s => s.get()));
   initializing = false;
 
   return {

@@ -1,6 +1,6 @@
 # Clavicula
 
-A minimal, AI-native reactive state management library (~670 bytes core) built on native EventTarget.
+A minimal, AI-native reactive state management library (~700 bytes core) built on native EventTarget.
 
 Clavicula is designed for **maximal comprehension by both humans and language models**. The entire API fits in working memory, uses platform primitives, and requires no special knowledge to use correctly.
 
@@ -154,11 +154,10 @@ The pattern scales to any complexity: derived stores can depend on other derived
 | `withPersist(store, key)` | localStorage sync (SSR-safe) |
 | `withBatching(store)` | Batch updates into single notification |
 | `withDistinct(store, isEqual?)` | Block redundant updates via equality check |
-| `withFreeze(store)` | Deep freeze state to catch mutations |
+| `withFreeze(store)` | Deep freeze state to catch mutations (dev only, no-op in prod) |
 | `withReset(store)` | Add `reset()` to restore initial state |
 | `withLogging(store, label?)` | Log state changes to console |
 | `withHistory(store, maxSize?)` | Undo/redo with `undo()`, `redo()`, `canUndo()`, `canRedo()` |
-| `batchedDerived(stores, fn, isEqual?)` | Like `derived`, but batches dependency updates |
 
 Decorators are composable. See [Writing Decorators](./docs/decorators.md) for patterns and composition order.
 
@@ -327,8 +326,8 @@ class CheckoutPanel extends HTMLElement {
 
 | Package | Size | Description |
 |---------|------|-------------|
-| `@grimoire/clavicula` | ~670B | Core: createStore, derived |
-| `@grimoire/clavicula-extras` | ~2KB (tree-shakeable) | Decorators: withPersist, withBatching, withHistory, etc. |
+| `@grimoire/clavicula` | ~700B | Core: createStore, derived |
+| `@grimoire/clavicula-extras` | ~1.6KB (tree-shakeable) | Decorators: withPersist, withBatching, withHistory, etc. |
 | `@grimoire/clavicula-react` | ~190B | React adapter: useStore hook |
 | `@grimoire/clavicula-vue` | ~150B | Vue 3 adapter: useStore composable |
 | `@grimoire/clavicula-solid` | ~140B | Solid adapter: useStore primitive |

@@ -1,4 +1,4 @@
-import type { Store, Subscribable, DerivedStore } from '@grimoire/clavicula';
+import type { Store } from '@grimoire/clavicula';
 
 // ─────────────────────────────────────────────────────────────
 // withPersist
@@ -31,7 +31,7 @@ export function withDistinct<T extends object>(
 // withFreeze
 // ─────────────────────────────────────────────────────────────
 
-/** Freezes state objects to catch accidental mutations */
+/** In dev: freezes state to catch mutations. In prod: no-op. */
 export function withFreeze<T extends object>(store: Store<T>): Store<T>;
 
 // ─────────────────────────────────────────────────────────────
@@ -77,20 +77,3 @@ export function withHistory<T extends object>(
   maxSize?: number
 ): HistoryStore<T>;
 
-// ─────────────────────────────────────────────────────────────
-// batchedDerived
-// ─────────────────────────────────────────────────────────────
-
-/** Like derived(), but batches synchronous dependency updates into a single recomputation */
-export function batchedDerived<S, T>(
-  store: Subscribable<S>,
-  fn: (state: S) => T,
-  isEqual?: (a: T, b: T) => boolean
-): DerivedStore<T>;
-
-/** Like derived(), but batches synchronous dependency updates into a single recomputation */
-export function batchedDerived<S extends unknown[], T>(
-  stores: { [K in keyof S]: Subscribable<S[K]> },
-  fn: (...states: S) => T,
-  isEqual?: (a: T, b: T) => boolean
-): DerivedStore<T>;

@@ -7,8 +7,7 @@ import {
   withFreeze,
   withReset,
   withLogging,
-  withHistory,
-  batchedDerived
+  withHistory
 } from './index.js';
 
 // ─────────────────────────────────────────────────────────────
@@ -144,13 +143,13 @@ describe('withBatching', () => {
     expect(listener).toHaveBeenLastCalledWith({ count: 3 });
   });
 
-  it('get() returns pending changes during batch', () => {
+  it('get() returns committed value during batch', () => {
     const store = withBatching(createStore({ x: 0, y: 0 }));
 
     store.set({ x: 5 });
 
-    // Before flush, get() should see the pending value
-    expect(store.get()).toEqual({ x: 5, y: 0 });
+    // Before flush, get() returns committed value (not optimistic)
+    expect(store.get()).toEqual({ x: 0, y: 0 });
   });
 
   it('composes with other decorators', async () => {
@@ -502,105 +501,3 @@ describe('decorator composition', () => {
   });
 });
 
-// ─────────────────────────────────────────────────────────────
-// batchedDerived
-// ─────────────────────────────────────────────────────────────
-
-describe('batchedDerived', () => {
-  it('computes initial value', () => {
-    const a = createStore({ x: 1 });
-    const d = batchedDerived(a, s => s.x * 2);
-
-    expect(d.get()).toBe(2);
-  });
-
-  it('updates when dependency changes', async () => {
-    const a = createStore({ x: 1 });
-    const d = batchedDerived(a, s => s.x * 2);
-
-    a.set({ x: 5 });
-    await Promise.resolve(); // flush microtask
-
-    expect(d.get()).toBe(10);
-  });
-
-  it('batches multiple synchronous updates into single recomputation', async () => {
-    const a = createStore({ x: 0 });
-    const b = createStore({ y: 0 });
-    const fn = vi.fn((aVal, bVal) => aVal.x + bVal.y);
-    const d = batchedDerived([a, b], fn);
-
-    expect(fn).toHaveBeenCalledTimes(1); // initial
-
-    a.set({ x: 1 });
-    b.set({ y: 2 });
-    a.set({ x: 10 });
-
-    expect(fn).toHaveBeenCalledTimes(1); // still just initial, batched
-
-    await Promise.resolve(); // flush microtask
-
-    expect(fn).toHaveBeenCalledTimes(2); // initial + one batched recompute
-    expect(d.get()).toBe(12);
-  });
-
-  it('notifies subscribers after batch', async () => {
-    const a = createStore({ x: 0 });
-    const b = createStore({ y: 0 });
-    const d = batchedDerived([a, b], (aVal, bVal) => aVal.x + bVal.y);
-    const listener = vi.fn();
-    d.subscribe(listener);
-
-    expect(listener).toHaveBeenCalledTimes(1); // initial
-
-    a.set({ x: 5 });
-    b.set({ y: 5 });
-
-    await Promise.resolve();
-
-    expect(listener).toHaveBeenCalledTimes(2); // initial + batched
-    expect(listener).toHaveBeenLastCalledWith(10);
-  });
-
-  it('does not notify if value unchanged after batch', async () => {
-    const a = createStore({ x: 1 });
-    const b = createStore({ y: -1 });
-    const d = batchedDerived([a, b], (aVal, bVal) => aVal.x + bVal.y);
-    const listener = vi.fn();
-    d.subscribe(listener);
-
-    a.set({ x: 5 });
-    b.set({ y: -5 }); // sum still 0
-
-    await Promise.resolve();
-
-    expect(listener).toHaveBeenCalledTimes(1); // only initial, no change
-  });
-
-  it('supports custom equality function', async () => {
-    const a = createStore({ items: [1, 2] });
-    const arrayEqual = (a, b) => JSON.stringify(a) === JSON.stringify(b);
-    const d = batchedDerived(a, s => [...s.items], arrayEqual);
-    const listener = vi.fn();
-    d.subscribe(listener);
-
-    a.set({ items: [1, 2] }); // same contents
-
-    await Promise.resolve();
-
-    expect(listener).toHaveBeenCalledTimes(1); // blocked by equality
-  });
-
-  it('destroy() cleans up subscriptions', async () => {
-    const a = createStore({ x: 1 });
-    const fn = vi.fn(s => s.x);
-    const d = batchedDerived(a, fn);
-
-    d.destroy();
-    a.set({ x: 99 });
-
-    await Promise.resolve();
-
-    expect(fn).toHaveBeenCalledTimes(1); // only initial, no recompute after destroy
-  });
-});

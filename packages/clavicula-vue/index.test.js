@@ -67,7 +67,7 @@ describe('useStore (Vue)', () => {
     // but the real implementation properly unsubscribes
   });
 
-  it('works with derived stores', () => {
+  it('works with derived stores', async () => {
     const store = createStore({ items: [1, 2, 3] });
     const count = derived(store, s => s.items.length);
 
@@ -75,6 +75,7 @@ describe('useStore (Vue)', () => {
     expect(state.value).toBe(3);
 
     store.set({ items: [1, 2, 3, 4, 5] });
+    await Promise.resolve();
     expect(state.value).toBe(5);
 
     count.destroy();

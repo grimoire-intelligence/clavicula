@@ -62,7 +62,7 @@ console.log(total.get()); // 110
 total.destroy();
 ```
 
-Derived stores only notify subscribers when the computed value actually changes (using `Object.is` comparison).
+Derived stores batch multiple synchronous source updates into a single recomputation, and only notify subscribers when the computed value actually changes (using `Object.is` comparison).
 
 ### Persistence
 

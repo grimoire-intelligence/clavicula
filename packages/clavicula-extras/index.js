@@ -48,7 +48,7 @@ export function withBatching(store) {
   let queued = {};
 
   return {
-    get: () => ({ ...store.get(), ...queued }),
+    get: () => store.get(),
 
     subscribe: store.subscribe,
 
@@ -59,7 +59,8 @@ export function withBatching(store) {
       if (!batching) {
         batching = true;
         queueMicrotask(() => {
-          store.set(queued);
+          const final = { ...store.get(), ...queued };
+          store.set(final);
           queued = {};
           batching = false;
         });
@@ -103,7 +104,7 @@ export function withDistinct(store, isEqual = shallowEqual) {
         ? { ...current, ...partial(current) }
         : { ...current, ...partial };
       if (!isEqual(current, next)) {
-        store.set(partial);
+        store.set(next);
       }
     }
   };
@@ -114,34 +115,31 @@ export function withDistinct(store, isEqual = shallowEqual) {
 // ─────────────────────────────────────────────────────────────
 
 /**
- * Recursively freezes an object and all nested objects.
- * @param {object} obj
- * @returns {object} The same object, now frozen
- */
-function deepFreeze(obj) {
-  Object.freeze(obj);
-  Object.values(obj).forEach(v => {
-    if (v && typeof v === 'object' && !Object.isFrozen(v)) {
-      deepFreeze(v);
-    }
-  });
-  return obj;
-}
-
-/**
- * Decorator that freezes state objects to catch accidental mutations.
+ * In development: deeply freezes state after every set() to catch mutations.
+ * In production: identity function (no-op).
  * @param {import('@grimoire/clavicula').Store} store - The store to wrap
- * @returns {import('@grimoire/clavicula').Store} A new store that freezes state
+ * @returns {import('@grimoire/clavicula').Store} A new store that freezes state (dev only)
  */
 export function withFreeze(store) {
-  deepFreeze(store.get());
+  if (typeof process === 'undefined' || process.env.NODE_ENV === 'production') {
+    return store;
+  }
+
+  const freeze = (obj) => {
+    if (obj && typeof obj === 'object' && !Object.isFrozen(obj)) {
+      Object.freeze(obj);
+      Object.values(obj).forEach(freeze);
+    }
+  };
+
+  freeze(store.get());
 
   return {
     get: store.get,
     subscribe: store.subscribe,
     set(partial) {
       store.set(partial);
-      deepFreeze(store.get());
+      freeze(store.get());
     }
   };
 }
@@ -241,58 +239,3 @@ export function withHistory(store, maxSize = 50) {
   };
 }
 
-// ─────────────────────────────────────────────────────────────
-// batchedDerived
-// ─────────────────────────────────────────────────────────────
-
-/**
- * Like derived(), but batches multiple synchronous dependency updates into a single recomputation.
- * @param {import('@grimoire/clavicula').Subscribable|import('@grimoire/clavicula').Subscribable[]} stores - One or more source stores
- * @param {Function} fn - Derivation function receiving current values of all source stores
- * @param {Function} [isEqual=Object.is] - Equality function to prevent spurious notifications
- * @returns {import('@grimoire/clavicula').DerivedStore} DerivedStore with get(), subscribe(), destroy() methods
- */
-export function batchedDerived(stores, fn, isEqual = Object.is) {
-  const deps = Array.isArray(stores) ? stores : [stores];
-  const listeners = new Set();
-  const unsubs = [];
-  let pending = false;
-  let initializing = true;
-
-  let value = fn(...deps.map(s => s.get()));
-
-  deps.forEach(store => {
-    const unsub = store.subscribe(() => {
-      if (initializing) return;
-      if (!pending) {
-        pending = true;
-        queueMicrotask(() => {
-          pending = false;
-          const next = fn(...deps.map(s => s.get()));
-          if (!isEqual(value, next)) {
-            value = next;
-            listeners.forEach(l => l(value));
-          }
-        });
-      }
-    });
-    unsubs.push(unsub);
-  });
-
-  initializing = false;
-
-  return {
-    get: () => value,
-
-    subscribe(fn) {
-      listeners.add(fn);
-      fn(value);
-      return () => listeners.delete(fn);
-    },
-
-    destroy() {
-      unsubs.forEach(fn => fn());
-      listeners.clear();
-    }
-  };
-}

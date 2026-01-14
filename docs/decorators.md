@@ -56,7 +56,7 @@ function withDistinct(store, isEqual = shallowEqual) {
         ? { ...current, ...partial(current) }
         : { ...current, ...partial };
       if (!isEqual(current, next)) {
-        store.set(partial);
+        store.set(next);     // Pass computed next, not partial
       }
     }
   };
@@ -68,7 +68,7 @@ Use when:
 - Intercepting `get()` to transform returned state
 - Intercepting `subscribe()` to filter or batch notifications
 
-Examples: `withDistinct`, `withFreeze`, `withBatching`
+Examples: `withDistinct`, `withFreeze` (dev only), `withBatching`
 
 ### Pattern 3: Extended
 
@@ -148,7 +148,7 @@ Decorators wrap in layers—outer decorators intercept calls first, inner decora
 1. **Batching** (`withBatching`) — Collect updates before anything else
 2. **Filtering** (`withDistinct`) — Check the batched result once
 3. **History** (`withHistory`) — Track meaningful state changes
-4. **Validation/Transform** (`withFreeze`) — Process final state
+4. **Validation/Transform** (`withFreeze`, dev only) — Process final state
 5. **Side effects** (`withLogging`, `withPersist`) — Observe final state
 
 ```javascript

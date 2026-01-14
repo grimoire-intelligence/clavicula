@@ -1,6 +1,6 @@
 # Clavicula
 
-A minimal, AI-native reactive state management library (~1KB) built on native EventTarget.
+A minimal, AI-native reactive state management library (~670 bytes core) built on native EventTarget.
 
 Clavicula is designed for **maximal comprehension by both humans and language models**. The entire API fits in working memory, uses platform primitives, and requires no special knowledge to use correctly.
 
@@ -9,6 +9,9 @@ Clavicula is designed for **maximal comprehension by both humans and language mo
 ```bash
 # Core library
 npm install @grimoire/clavicula
+
+# Optional decorators (persistence, batching, history, etc.)
+npm install @grimoire/clavicula-extras
 
 # Framework adapters (pick one)
 npm install @grimoire/clavicula-react
@@ -22,7 +25,8 @@ npm install @grimoire/clavicula-angular
 ## Quick Start
 
 ```javascript
-import { createStore, derived, withPersist, withBatching } from '@grimoire/clavicula';
+import { createStore, derived } from '@grimoire/clavicula';
+import { withPersist, withBatching } from '@grimoire/clavicula-extras';
 
 // Create a store
 const store = createStore({ count: 0, user: null });
@@ -41,10 +45,10 @@ unsubscribe(); // cleanup
 // Derived (computed) stores
 const doubled = derived(store, s => s.count * 2);
 
-// Persistence
+// Persistence (from extras)
 const settings = withPersist(createStore({ theme: 'light' }), 'settings');
 
-// Batching (for vanilla JS/Svelte; React/Vue/Solid batch automatically)
+// Batching (from extras, for vanilla JS/Svelte; React/Vue/Solid batch automatically)
 const batched = withBatching(createStore({ x: 0, y: 0 }));
 batched.set({ x: 1 });
 batched.set({ y: 2 });
@@ -57,8 +61,8 @@ batched.set({ y: 2 });
 
 | Aspect | Clavicula | Zustand | Redux |
 |--------|-----------|---------|-------|
-| **Bundle size** | ~1KB | ~2KB | ~10KB+ |
-| **API surface** | 8 items | ~15 items | 50+ items |
+| **Bundle size** | ~670B core | ~2KB | ~10KB+ |
+| **API surface** | 6 core items | ~15 items | 50+ items |
 | **Learning curve** | Minutes | Hours | Days |
 | **Concepts** | get/set/subscribe | Stores, selectors, middleware | Actions, reducers, dispatch, thunks |
 | **Dependencies** | None (platform only) | None | immer, redux-toolkit recommended |
@@ -72,7 +76,7 @@ batched.set({ y: 2 });
 
 Modern development increasingly involves AI assistants writing and modifying code. Clavicula is built from the ground up for this reality:
 
-1. **Complete API in context** — The entire library (8 vocabulary items) fits in any LLM's working memory. No hallucinated methods, no invented patterns.
+1. **Complete API in context** — The entire core library (6 vocabulary items) fits in any LLM's working memory. No hallucinated methods, no invented patterns.
 
 2. **Platform primitives** — Uses `EventTarget` and `CustomEvent`, which every language model knows from web platform documentation. No proprietary concepts to learn.
 
@@ -132,7 +136,7 @@ The pattern scales to any complexity: derived stores can depend on other derived
 
 ## API Reference
 
-### Complete Vocabulary (8 items)
+### Core (`@grimoire/clavicula`)
 
 | Export | Type | Description |
 |--------|------|-------------|
@@ -142,10 +146,21 @@ The pattern scales to any complexity: derived stores can depend on other derived
 | `store.subscribe(fn)` | method | Listen for changes, returns unsubscribe |
 | `derived(stores, fn, isEqual?)` | function | Create computed store |
 | `derivedStore.destroy()` | method | Cleanup derived subscriptions |
-| `withPersist(store, key)` | function | Add localStorage sync |
-| `withBatching(store)` | function | Batch updates into single notification |
 
-This is the **complete** API. There are no other methods, options, or behaviors.
+### Extras (`@grimoire/clavicula-extras`)
+
+| Export | Description |
+|--------|-------------|
+| `withPersist(store, key)` | localStorage sync (SSR-safe) |
+| `withBatching(store)` | Batch updates into single notification |
+| `withDistinct(store, isEqual?)` | Block redundant updates via equality check |
+| `withFreeze(store)` | Deep freeze state to catch mutations |
+| `withReset(store)` | Add `reset()` to restore initial state |
+| `withLogging(store, label?)` | Log state changes to console |
+| `withHistory(store, maxSize?)` | Undo/redo with `undo()`, `redo()`, `canUndo()`, `canRedo()` |
+| `batchedDerived(stores, fn, isEqual?)` | Like `derived`, but batches dependency updates |
+
+Decorators are composable. See [Writing Decorators](./docs/decorators.md) for patterns and composition order.
 
 ## Framework Integration
 
@@ -310,17 +325,19 @@ class CheckoutPanel extends HTMLElement {
 
 ## Packages
 
-| Package | Description |
-|---------|-------------|
-| `@grimoire/clavicula` | Core library: createStore, derived, withPersist, withBatching |
-| `@grimoire/clavicula-react` | React adapter: useStore hook |
-| `@grimoire/clavicula-vue` | Vue 3 adapter: useStore composable |
-| `@grimoire/clavicula-solid` | Solid adapter: useStore primitive |
-| `@grimoire/clavicula-angular` | Angular adapter: toObservable, toSignal |
+| Package | Size | Description |
+|---------|------|-------------|
+| `@grimoire/clavicula` | ~670B | Core: createStore, derived |
+| `@grimoire/clavicula-extras` | ~2KB (tree-shakeable) | Decorators: withPersist, withBatching, withHistory, etc. |
+| `@grimoire/clavicula-react` | ~190B | React adapter: useStore hook |
+| `@grimoire/clavicula-vue` | ~150B | Vue 3 adapter: useStore composable |
+| `@grimoire/clavicula-solid` | ~140B | Solid adapter: useStore primitive |
+| `@grimoire/clavicula-angular` | ~270B | Angular adapter: toObservable, toSignal |
 
 ## Documentation
 
 - [Architecture Decisions](./docs/architecture.md) — Why EventTarget? Why Object.is? Design rationale.
+- [Writing Decorators](./docs/decorators.md) — How to create custom decorators and composition order.
 - [Agent Skill](./docs/clavicula.skill.md) — Machine-readable API reference for AI assistants.
 - [PRD](./docs/prd.md) — Original product requirements document.
 

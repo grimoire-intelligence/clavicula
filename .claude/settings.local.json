@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__lemegeton__next_pr",
+      "mcp__lemegeton__pr_complete",
+      "mcp__lemegeton__set_pr_hot_state",
+      "mcp__lemegeton__run_pr"
+    ]
+  }
+}

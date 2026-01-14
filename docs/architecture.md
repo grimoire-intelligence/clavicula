@@ -24,14 +24,16 @@ The smaller and more predictable each step, the more reliably it can be comprehe
 - No options objects on `createStore`
 - No middleware system—write decorators instead
 - No modes or flags that change behavior
-- `withPersist` is external composition, not internal configuration
+- Decorators are external composition, not internal configuration
+- Optional features live in `@grimoire/clavicula-extras`
 
 ### 3. Memory Before Reasoning
 
 An API surface must fit entirely in context. Hallucination happens when a model must guess instead of knowing.
 
 **Implications:**
-- 7 vocabulary items total
+- 6 core vocabulary items (createStore, get, set, subscribe, derived, destroy)
+- Optional extras package for decorators (pay only for what you use)
 - No method overloads
 - No polymorphic behaviors requiring contextual inference
 - Complete API visible in a single screen
@@ -131,8 +133,9 @@ Separate functions would work but:
 The decorator pattern:
 - Keeps `createStore` simple
 - Makes persistence explicit and visible
-- Allows stacking: `withPersist(withLogging(createStore(...)))`
+- Allows stacking: `withBatching(withDistinct(withPersist(createStore(...))))`
 - Returns the same store interface (no new API to learn)
+- Decorators live in a separate package (`@grimoire/clavicula-extras`)—pay only for what you use
 
 ### Why Eager Derived Evaluation?
 
@@ -190,15 +193,18 @@ This pushes complexity to where it's explicit and debuggable.
 
 ### Bundle Size
 
-| Component | Size (minified + gzipped) |
-|-----------|---------------------------|
-| Core (`createStore`, `derived`, `withPersist`, `withBatching`) | ~600 bytes |
-| React adapter | ~170 bytes |
+| Component | Size (minified) |
+|-----------|-----------------|
+| Core (`createStore`, `derived`) | ~670 bytes |
+| Extras (all decorators) | ~2KB |
+| React adapter | ~190 bytes |
 | Vue adapter | ~150 bytes |
 | Solid adapter | ~140 bytes |
-| Angular adapter | ~200 bytes |
+| Angular adapter | ~270 bytes |
 
-Total core + one adapter: **~770 bytes**
+Total core + one adapter: **~860 bytes**
+
+Extras are tree-shakeable—import only what you need.
 
 For comparison:
 - Zustand: ~2KB
@@ -331,14 +337,25 @@ Clavicula works with signals (via adapters) while providing a framework-agnostic
 
 ## Future Considerations
 
-### Potential Extensions (as separate packages)
+### Implemented Extensions (`@grimoire/clavicula-extras`)
 
-1. **withHistory** - Undo/redo decorator
-2. **withMiddleware** - Intercept sets for logging/validation
-3. **createAtom** - Single-value store for primitives
-4. **broadcast** - Cross-tab synchronization
+The following decorators are now available in the extras package:
 
-Each would follow the decorator pattern, keeping the core minimal.
+- **withPersist** - localStorage sync (SSR-safe)
+- **withBatching** - Batch synchronous updates
+- **withDistinct** - Block redundant updates via shallow equality
+- **withFreeze** - Deep freeze state to catch mutations
+- **withReset** - Add `reset()` method
+- **withLogging** - Console logging for debugging
+- **withHistory** - Undo/redo capability
+- **batchedDerived** - Derived stores with batched recomputation
+
+See [Writing Decorators](./decorators.md) for patterns and composition guidance.
+
+### Potential Future Extensions
+
+1. **createAtom** - Single-value store for primitives
+2. **broadcast** - Cross-tab synchronization via BroadcastChannel
 
 ### What We Won't Add
 
@@ -347,4 +364,4 @@ Each would follow the decorator pattern, keeping the core minimal.
 - Async actions (call `set` when promise resolves)
 - React-specific hooks (adapters handle this)
 
-The core will remain ~60 lines of code.
+The core will remain ~40 lines of code.

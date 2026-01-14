@@ -37,11 +37,13 @@ export function derived(stores, fn, isEqual = Object.is) {
   const deps = Array.isArray(stores) ? stores : [stores];
   const listeners = new Set();
   const unsubs = [];
+  let initializing = true;
 
   let value = fn(...deps.map(s => s.get()));
 
   deps.forEach(store => {
     const unsub = store.subscribe(() => {
+      if (initializing) return;
       const next = fn(...deps.map(s => s.get()));
       if (!isEqual(value, next)) {
         value = next;
@@ -50,6 +52,8 @@ export function derived(stores, fn, isEqual = Object.is) {
     });
     unsubs.push(unsub);
   });
+
+  initializing = false;
 
   return {
     get: () => value,
@@ -67,56 +71,3 @@ export function derived(stores, fn, isEqual = Object.is) {
   };
 }
 
-/**
- * Decorator that syncs a store with localStorage.
- * @param {Store} store - The store to persist
- * @param {string} key - localStorage key
- * @returns {Store} The same store (mutated to add persistence)
- */
-export function withPersist(store, key) {
-  const saved = localStorage.getItem(key);
-  if (saved) {
-    try {
-      store.set(JSON.parse(saved));
-    } catch (e) {
-      console.warn(`Failed to parse persisted state for "${key}"`, e);
-    }
-  }
-
-  store.subscribe(state => {
-    localStorage.setItem(key, JSON.stringify(state));
-  });
-
-  return store;
-}
-
-/**
- * Decorator that batches multiple synchronous set() calls into a single notification.
- * Useful for vanilla JS and Svelte; React/Vue/Solid handle their own batching.
- * @param {Store} store - The store to wrap
- * @returns {Store} A new store with batched updates
- */
-export function withBatching(store) {
-  let batching = false;
-  let queued = {};
-
-  return {
-    get: () => ({ ...store.get(), ...queued }),
-
-    subscribe: store.subscribe,
-
-    set(partial) {
-      const current = { ...store.get(), ...queued };
-      const update = typeof partial === 'function' ? partial(current) : partial;
-      queued = { ...queued, ...update };
-      if (!batching) {
-        batching = true;
-        queueMicrotask(() => {
-          store.set(queued);
-          queued = {};
-          batching = false;
-        });
-      }
-    }
-  };
-}

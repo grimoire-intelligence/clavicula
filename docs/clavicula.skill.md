@@ -7,20 +7,20 @@ This document provides a machine-readable API reference for AI assistants workin
 ```yaml
 name: clavicula
 version: 0.1.0
-package: "@grimoire/clavicula"
+packages:
+  core: "@grimoire/clavicula"          # ~670 bytes
+  extras: "@grimoire/clavicula-extras" # ~2KB, tree-shakeable
 category: state-management
 framework: agnostic
-bundle_size: ~1KB
 ```
 
 ## Quick Reference
 
 ```
-IMPORTS:  import { createStore, derived, withPersist, withBatching } from '@grimoire/clavicula';
+CORE:     import { createStore, derived } from '@grimoire/clavicula';
+EXTRAS:   import { withPersist, withBatching, withHistory, ... } from '@grimoire/clavicula-extras';
 STORE:    store.get() | store.set(partial) | store.subscribe(fn) => unsubscribe
 DERIVED:  derivedStore.get() | derivedStore.subscribe(fn) | derivedStore.destroy()
-PERSIST:  withPersist(store, 'key') => store
-BATCHING: withBatching(store) => store (coalesces synchronous sets)
 ```
 
 ---
@@ -249,11 +249,13 @@ derivedStore.destroy(): void
 
 ---
 
-### withPersist
+### withPersist (from `@grimoire/clavicula-extras`)
 
-Syncs store state with localStorage.
+Syncs store state with localStorage. SSR-safe (no-op if localStorage unavailable).
 
 ```typescript
+import { withPersist } from '@grimoire/clavicula-extras';
+
 function withPersist<T extends object>(
   store: Store<T>,
   key: string
@@ -282,11 +284,13 @@ const settings = withPersist(
 
 ---
 
-### withBatching
+### withBatching (from `@grimoire/clavicula-extras`)
 
 Batches multiple synchronous set() calls into a single subscriber notification.
 
 ```typescript
+import { withBatching } from '@grimoire/clavicula-extras';
+
 function withBatching<T extends object>(store: Store<T>): Store<T>
 ```
 
@@ -425,7 +429,8 @@ export function decrement() {
 ### Pattern: Persisted Settings
 
 ```javascript
-import { createStore, withPersist } from '@grimoire/clavicula';
+import { createStore } from '@grimoire/clavicula';
+import { withPersist } from '@grimoire/clavicula-extras';
 
 export const settingsStore = withPersist(
   createStore({
@@ -543,6 +548,8 @@ const count = derived(store, s => s.items.length); // Primitive
 ### Mistake: Using withPersist with Sensitive Data
 
 ```javascript
+import { withPersist } from '@grimoire/clavicula-extras';
+
 // WRONG: Tokens in localStorage are XSS-vulnerable
 const authStore = withPersist(createStore({ token: '...' }), 'auth');
 
@@ -623,6 +630,8 @@ disconnectedCallback() {
 
 ## Type Definitions Summary
 
+### Core (`@grimoire/clavicula`)
+
 ```typescript
 interface Store<T extends object> {
   get(): T;
@@ -638,29 +647,36 @@ interface DerivedStore<T> {
 
 function createStore<T extends object>(initialState: T): Store<T>;
 
-function derived<S extends object, T>(
-  store: Store<S>,
-  fn: (state: S) => T
-): DerivedStore<T>;
-
-function derived<S extends object[], T>(
-  stores: { [K in keyof S]: Store<S[K]> },
+function derived<S, T>(store: Subscribable<S>, fn: (state: S) => T): DerivedStore<T>;
+function derived<S extends unknown[], T>(
+  stores: { [K in keyof S]: Subscribable<S[K]> },
   fn: (...states: S) => T
 ): DerivedStore<T>;
+```
 
-function withPersist<T extends object>(
-  store: Store<T>,
-  key: string
-): Store<T>;
+### Extras (`@grimoire/clavicula-extras`)
 
+```typescript
+function withPersist<T extends object>(store: Store<T>, key: string): Store<T>;
 function withBatching<T extends object>(store: Store<T>): Store<T>;
+function withDistinct<T extends object>(store: Store<T>, isEqual?: (a: T, b: T) => boolean): Store<T>;
+function withFreeze<T extends object>(store: Store<T>): Store<T>;
+function withReset<T extends object>(store: Store<T>): Store<T> & { reset(): void };
+function withLogging<T extends object>(store: Store<T>, label?: string): Store<T>;
+function withHistory<T extends object>(store: Store<T>, maxSize?: number): Store<T> & {
+  undo(): void;
+  redo(): void;
+  canUndo(): boolean;
+  canRedo(): boolean;
+};
+function batchedDerived<S, T>(store: Subscribable<S>, fn: (state: S) => T): DerivedStore<T>;
 ```
 
 ---
 
 ## Vocabulary Checklist
 
-When writing Clavicula code, verify you're only using these 8 items:
+### Core (always available)
 
 1. `createStore(initial)` - create store
 2. `store.get()` - read state
@@ -668,7 +684,16 @@ When writing Clavicula code, verify you're only using these 8 items:
 4. `store.subscribe(fn)` - listen to changes
 5. `derived(stores, fn)` - create computed store
 6. `derivedStore.destroy()` - cleanup derived
-7. `withPersist(store, key)` - add persistence
-8. `withBatching(store)` - batch updates
 
-If you're reaching for something not in this list, reconsider the approach.
+### Extras (import from `@grimoire/clavicula-extras`)
+
+- `withPersist(store, key)` - localStorage sync
+- `withBatching(store)` - batch updates
+- `withDistinct(store)` - block redundant updates
+- `withFreeze(store)` - freeze state
+- `withReset(store)` - add reset()
+- `withLogging(store)` - console logging
+- `withHistory(store)` - undo/redo
+- `batchedDerived(stores, fn)` - batched derived store
+
+Core is all you need. Extras are opt-in for specific use cases.

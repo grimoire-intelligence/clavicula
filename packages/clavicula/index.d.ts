@@ -46,19 +46,3 @@ export function derived<S extends unknown[], T>(
   isEqual?: (a: T, b: T) => boolean
 ): DerivedStore<T>;
 
-// ─────────────────────────────────────────────────────────────
-// Persist
-// ─────────────────────────────────────────────────────────────
-
-/** Syncs store state with localStorage under the given key */
-export function withPersist<T extends object>(
-  store: Store<T>,
-  key: string
-): Store<T>;
-
-// ─────────────────────────────────────────────────────────────
-// Batching
-// ─────────────────────────────────────────────────────────────
-
-/** Batches multiple synchronous set() calls into a single notification */
-export function withBatching<T extends object>(store: Store<T>): Store<T>;

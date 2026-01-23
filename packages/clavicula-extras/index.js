@@ -6,9 +6,9 @@
  * Decorator that syncs a store with localStorage.
  *
  * WARNING: Writes to localStorage on EVERY state change. For stores with frequent
- * updates or large state, first wrap with withBatching and withDistinct:
- *   withPersist(withBatching(withDistinct(createStore(...))), 'key')
- * This ensures persistence only triggers on batched, distinct changes.
+ * updates or large state, wrap with withBatching first:
+ *   withPersist(withBatching(createStore(...)), 'key')
+ * This ensures persistence only triggers on batched, deduplicated changes.
  *
  * @param {import('@grimoire/clavicula').Store} store - The store to persist
  * @param {string} key - localStorage key

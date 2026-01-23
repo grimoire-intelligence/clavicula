@@ -133,29 +133,33 @@ set(partial) {
 
 Decorators wrap in layers—outer decorators intercept calls first, inner decorators are closest to the real store. Order changes behavior.
 
-**Recommended order (outermost → innermost):**
+**Key insight:** Decorators that use `subscribe()` internally (Pattern 1 side effects) must be **outermost**. They subscribe to whatever store is passed to them—if that's the raw store, they see raw updates. If that's a batched store, they see batched updates.
 
-1. **Batching** (`withBatching`) — Collect and dedupe updates before anything else
-2. **History** (`withHistory`) — Track meaningful state changes
-3. **Validation/Transform** (`withFreeze`, dev only) — Process final state
-4. **Side effects** (`withLogging`, `withPersist`) — Observe final state
+**Recommended order (innermost → outermost):**
+
+1. **Validation/Transform** (`withFreeze`, dev only) — Process state immediately
+2. **History** (`withHistory`) — Track changes after validation
+3. **Batching** (`withBatching`) — Collect and dedupe updates
+4. **Side effects** (`withLogging`, `withPersist`) — Observe processed state
 
 ```javascript
-withBatching(
-  withHistory(
-    withFreeze(
-      withLogging(store, 'myStore')
+withPersist(
+  withBatching(
+    withHistory(
+      withFreeze(store)
     )
-  )
+  ),
+  'myStore'
 )
 ```
 
 **Why this order:**
-- Batching first = collects multiple synchronous `set()` calls, then checks equality once per batch (like `derived()` does)
-- History after batching = only track meaningful, deduplicated changes
-- Side effects last = they see the actual stored state
+- Validation innermost = state is valid throughout the chain
+- History inside batching = tracks each `set()` call (use batching to control granularity)
+- Batching before side effects = subscribers see deduplicated state
+- Side effects outermost = they subscribe to the fully processed store
 
-**Note:** `withBatching` now includes built-in equality checking (shallow by default). Pass a custom equality function as the second argument, or `() => false` to disable filtering.
+**Note:** `withBatching` includes built-in equality checking (shallow by default). Pass a custom equality function as the second argument, or `() => false` to disable filtering.
 
 ### withPersist Requires Protection
 
@@ -163,7 +167,7 @@ withBatching(
 - Rapidly changing state (e.g., drag position, form input)
 - Large objects (localStorage is synchronous, blocks main thread)
 
-**Always wrap with batching first:**
+**Always wrap with batching:**
 
 ```javascript
 // WRONG: Writes to localStorage on every keystroke
@@ -176,8 +180,6 @@ const formStore = withPersist(
 );
 ```
 
-Note: `withPersist` must be **outermost** because it uses `subscribe()` internally. If placed inside other wrappers, it subscribes to the inner store directly, bypassing batching.
-
 ### Keep It Minimal
 
 Each decorator should do one thing. If you're adding multiple features, split them:
@@ -187,7 +189,7 @@ Each decorator should do one thing. If you're adding multiple features, split th
 function withEverything(store) { ... }
 
 // RIGHT: Compose single-purpose decorators
-withBatching(withHistory(withFreeze(store)))
+withPersist(withBatching(withHistory(store)), 'key')
 ```
 
 ### Handle Edge Cases

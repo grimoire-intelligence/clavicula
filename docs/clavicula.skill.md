@@ -658,8 +658,7 @@ function derived<S extends unknown[], T>(
 
 ```typescript
 function withPersist<T extends object>(store: Store<T>, key: string): Store<T>;
-function withBatching<T extends object>(store: Store<T>): Store<T>;
-function withDistinct<T extends object>(store: Store<T>, isEqual?: (a: T, b: T) => boolean): Store<T>;
+function withBatching<T extends object>(store: Store<T>, isEqual?: (a: T, b: T) => boolean): Store<T>;
 function withFreeze<T extends object>(store: Store<T>): Store<T>;
 function withReset<T extends object>(store: Store<T>): Store<T> & { reset(): void };
 function withLogging<T extends object>(store: Store<T>, label?: string): Store<T>;
@@ -687,8 +686,7 @@ function withHistory<T extends object>(store: Store<T>, maxSize?: number): Store
 ### Extras (import from `@grimoire/clavicula-extras`)
 
 - `withPersist(store, key)` - localStorage sync
-- `withBatching(store)` - batch store updates
-- `withDistinct(store)` - block redundant updates
+- `withBatching(store, isEqual?)` - batch updates with equality filtering
 - `withFreeze(store)` - freeze state (dev only)
 - `withReset(store)` - add reset()
 - `withLogging(store)` - console logging

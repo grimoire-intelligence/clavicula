@@ -152,8 +152,7 @@ The pattern scales to any complexity: derived stores can depend on other derived
 | Export | Description |
 |--------|-------------|
 | `withPersist(store, key)` | localStorage sync (SSR-safe) |
-| `withBatching(store)` | Batch updates into single notification |
-| `withDistinct(store, isEqual?)` | Block redundant updates via equality check |
+| `withBatching(store, isEqual?)` | Batch updates with built-in equality filtering |
 | `withFreeze(store)` | Deep freeze state to catch mutations (dev only, no-op in prod) |
 | `withReset(store)` | Add `reset()` to restore initial state |
 | `withLogging(store, label?)` | Log state changes to console |

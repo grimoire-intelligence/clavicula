@@ -133,7 +133,7 @@ Separate functions would work but:
 The decorator pattern:
 - Keeps `createStore` simple
 - Makes persistence explicit and visible
-- Allows stacking: `withBatching(withDistinct(withPersist(createStore(...))))`
+- Allows stacking: `withPersist(withBatching(createStore(...)), 'key')`
 - Returns the same store interface (no new API to learn)
 - Decorators live in a separate package (`@grimoire/clavicula-extras`)—pay only for what you use
 
@@ -342,8 +342,7 @@ Clavicula works with signals (via adapters) while providing a framework-agnostic
 The following decorators are now available in the extras package:
 
 - **withPersist** - localStorage sync (SSR-safe)
-- **withBatching** - Batch synchronous updates
-- **withDistinct** - Block redundant updates via shallow equality
+- **withBatching** - Batch synchronous updates with built-in equality filtering
 - **withFreeze** - Deep freeze state to catch mutations
 - **withReset** - Add `reset()` method
 - **withLogging** - Console logging for debugging

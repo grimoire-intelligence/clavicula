@@ -1,6 +1,6 @@
 {
   "name": "@grimoire-intel/clavicula-react",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "type": "module",
   "main": "index.js",
   "types": "index.d.ts",
@@ -14,7 +14,7 @@
     "@grimoire-intel/clavicula": ">=1.0.0",
     "react": ">=18.0.0"
   },
-  "files": ["index.js", "index.d.ts"],
+  "files": ["index.js", "index.d.ts", "README.md"],
   "sideEffects": false,
   "license": "MIT"
 }

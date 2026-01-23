@@ -25,7 +25,7 @@ The smaller and more predictable each step, the more reliably it can be comprehe
 - No middleware system—write decorators instead
 - No modes or flags that change behavior
 - Decorators are external composition, not internal configuration
-- Optional features live in `@grimoire/clavicula-extras`
+- Optional features live in `@grimoire-intel/clavicula-extras`
 
 ### 3. Memory Before Reasoning
 
@@ -135,7 +135,7 @@ The decorator pattern:
 - Makes persistence explicit and visible
 - Allows stacking: `withPersist(withBatching(createStore(...)), 'key')`
 - Returns the same store interface (no new API to learn)
-- Decorators live in a separate package (`@grimoire/clavicula-extras`)—pay only for what you use
+- Decorators live in a separate package (`@grimoire-intel/clavicula-extras`)—pay only for what you use
 
 ### Why Eager Derived Evaluation?
 
@@ -337,7 +337,7 @@ Clavicula works with signals (via adapters) while providing a framework-agnostic
 
 ## Future Considerations
 
-### Implemented Extensions (`@grimoire/clavicula-extras`)
+### Implemented Extensions (`@grimoire-intel/clavicula-extras`)
 
 The following decorators are now available in the extras package:
 

@@ -8,16 +8,16 @@ Clavicula is designed for **maximal comprehension by both humans and language mo
 
 ```bash
 # Core library
-npm install @grimoire/clavicula
+npm install @grimoire-intel/clavicula
 
 # Optional decorators (persistence, batching, history, etc.)
-npm install @grimoire/clavicula-extras
+npm install @grimoire-intel/clavicula-extras
 
 # Framework adapters (pick one)
-npm install @grimoire/clavicula-react
-npm install @grimoire/clavicula-vue
-npm install @grimoire/clavicula-solid
-npm install @grimoire/clavicula-angular
+npm install @grimoire-intel/clavicula-react
+npm install @grimoire-intel/clavicula-vue
+npm install @grimoire-intel/clavicula-solid
+npm install @grimoire-intel/clavicula-angular
 ```
 
 **Note:** Svelte requires no adapter. Clavicula's `subscribe` contract is Svelte-native. If you're using Alpine, just use Alpine's store; when you've already paid for its reactivity model, its native store is smaller.
@@ -25,8 +25,8 @@ npm install @grimoire/clavicula-angular
 ## Quick Start
 
 ```javascript
-import { createStore, derived } from '@grimoire/clavicula';
-import { withPersist, withBatching } from '@grimoire/clavicula-extras';
+import { createStore, derived } from '@grimoire-intel/clavicula';
+import { withPersist, withBatching } from '@grimoire-intel/clavicula-extras';
 
 // Create a store
 const store = createStore({ count: 0, user: null });
@@ -136,7 +136,7 @@ The pattern scales to any complexity: derived stores can depend on other derived
 
 ## API Reference
 
-### Core (`@grimoire/clavicula`)
+### Core (`@grimoire-intel/clavicula`)
 
 | Export | Type | Description |
 |--------|------|-------------|
@@ -147,7 +147,7 @@ The pattern scales to any complexity: derived stores can depend on other derived
 | `derived(stores, fn, isEqual?)` | function | Create computed store |
 | `derivedStore.destroy()` | method | Cleanup derived subscriptions |
 
-### Extras (`@grimoire/clavicula-extras`)
+### Extras (`@grimoire-intel/clavicula-extras`)
 
 | Export | Description |
 |--------|-------------|
@@ -165,7 +165,7 @@ Decorators are composable. See [Writing Decorators](./docs/decorators.md) for pa
 ### React
 
 ```jsx
-import { useStore } from '@grimoire/clavicula-react';
+import { useStore } from '@grimoire-intel/clavicula-react';
 import { appStore } from './stores';
 
 function Counter() {
@@ -180,7 +180,7 @@ function Counter() {
 
 ```vue
 <script setup>
-import { useStore } from '@grimoire/clavicula-vue';
+import { useStore } from '@grimoire-intel/clavicula-vue';
 import { appStore } from './stores';
 
 const state = useStore(appStore);
@@ -194,7 +194,7 @@ const state = useStore(appStore);
 ### Solid
 
 ```jsx
-import { useStore } from '@grimoire/clavicula-solid';
+import { useStore } from '@grimoire-intel/clavicula-solid';
 import { appStore } from './stores';
 
 function Counter() {
@@ -206,7 +206,7 @@ function Counter() {
 ### Angular
 
 ```typescript
-import { toSignal } from '@grimoire/clavicula-angular';
+import { toSignal } from '@grimoire-intel/clavicula-angular';
 import { appStore } from './stores';
 
 @Component({
@@ -234,7 +234,7 @@ import { appStore } from './stores.js';
 ## Web Components Integration
 
 ```javascript
-import { createStore } from '@grimoire/clavicula';
+import { createStore } from '@grimoire-intel/clavicula';
 
 const appState = createStore({ count: 0 });
 
@@ -325,12 +325,12 @@ class CheckoutPanel extends HTMLElement {
 
 | Package | Size | Description |
 |---------|------|-------------|
-| `@grimoire/clavicula` | ~700B | Core: createStore, derived |
-| `@grimoire/clavicula-extras` | ~1.6KB (tree-shakeable) | Decorators: withPersist, withBatching, withHistory, etc. |
-| `@grimoire/clavicula-react` | ~190B | React adapter: useStore hook |
-| `@grimoire/clavicula-vue` | ~150B | Vue 3 adapter: useStore composable |
-| `@grimoire/clavicula-solid` | ~140B | Solid adapter: useStore primitive |
-| `@grimoire/clavicula-angular` | ~270B | Angular adapter: toObservable, toSignal |
+| `@grimoire-intel/clavicula` | ~700B | Core: createStore, derived |
+| `@grimoire-intel/clavicula-extras` | ~1.6KB (tree-shakeable) | Decorators: withPersist, withBatching, withHistory, etc. |
+| `@grimoire-intel/clavicula-react` | ~190B | React adapter: useStore hook |
+| `@grimoire-intel/clavicula-vue` | ~150B | Vue 3 adapter: useStore composable |
+| `@grimoire-intel/clavicula-solid` | ~140B | Solid adapter: useStore primitive |
+| `@grimoire-intel/clavicula-angular` | ~270B | Angular adapter: toObservable, toSignal |
 
 ## Documentation
 

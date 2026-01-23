@@ -1,6 +1,6 @@
 # Clavicula PRD
 
-**Package:** `@grimoire/clavicula`
+**Package:** `@grimoire-intel/clavicula`
 
 ## Overview
 
@@ -19,11 +19,11 @@ This library is **AI-native**—designed for maximal comprehension by both human
 ## Package Structure
 
 ```
-@grimoire/clavicula          # Core + derived + persist, single import
-@grimoire/clavicula-react    # React adapter
-@grimoire/clavicula-vue      # Vue adapter
-@grimoire/clavicula-solid    # Solid adapter
-@grimoire/clavicula-angular  # Angular adapter (RxJS Observable)
+@grimoire-intel/clavicula          # Core + derived + persist, single import
+@grimoire-intel/clavicula-react    # React adapter
+@grimoire-intel/clavicula-vue      # Vue adapter
+@grimoire-intel/clavicula-solid    # Solid adapter
+@grimoire-intel/clavicula-angular  # Angular adapter (RxJS Observable)
 ```
 
 Svelte needs no adapter—Clavicula's `subscribe` contract is Svelte-native. If you're using Alpine, just use Alpine's store, which is already compatible with Alpine's reactivity model.
@@ -31,7 +31,7 @@ Svelte needs no adapter—Clavicula's `subscribe` contract is Svelte-native. If 
 ### Core Package Layout
 
 ```
-@grimoire/clavicula/
+@grimoire-intel/clavicula/
 ├── index.js       # Exports createStore, derived, withPersist
 ├── index.d.ts     # All type declarations
 └── package.json
@@ -97,7 +97,7 @@ export function createStore(initial) {
 **Usage:**
 
 ```javascript
-import { createStore } from '@grimoire/clavicula';
+import { createStore } from '@grimoire-intel/clavicula';
 
 const store = createStore({ count: 0, user: null });
 
@@ -188,7 +188,7 @@ export function derived(stores, fn) {
 **Usage:**
 
 ```javascript
-import { createStore, derived } from '@grimoire/clavicula';
+import { createStore, derived } from '@grimoire-intel/clavicula';
 
 const cart = createStore({ items: [], discount: 0 });
 const user = createStore({ name: 'Alice', tier: 'premium' });
@@ -251,7 +251,7 @@ export function withPersist(store, key) {
 **Usage:**
 
 ```javascript
-import { createStore, withPersist } from '@grimoire/clavicula';
+import { createStore, withPersist } from '@grimoire-intel/clavicula';
 
 const settings = withPersist(
   createStore({ theme: 'light', fontSize: 16 }),
@@ -266,7 +266,7 @@ const settings = withPersist(
 Standard pattern for connecting stores to Web Components:
 
 ```javascript
-import { createStore } from '@grimoire/clavicula';
+import { createStore } from '@grimoire-intel/clavicula';
 
 const appState = createStore({ count: 0 });
 
@@ -313,13 +313,13 @@ customElements.define('my-counter', MyCounter);
 
 | Export | Source | Type | Description |
 |--------|--------|------|-------------|
-| `createStore` | @grimoire/clavicula | function | Create a reactive store |
+| `createStore` | @grimoire-intel/clavicula | function | Create a reactive store |
 | `get` | Store method | function | Read current state |
 | `set` | Store method | function | Update state |
 | `subscribe` | Store/DerivedStore method | function | Listen for changes |
-| `derived` | @grimoire/clavicula | function | Create computed store |
+| `derived` | @grimoire-intel/clavicula | function | Create computed store |
 | `destroy` | DerivedStore method | function | Cleanup derived store |
-| `withPersist` | @grimoire/clavicula | function | Add localStorage sync |
+| `withPersist` | @grimoire-intel/clavicula | function | Add localStorage sync |
 
 This is the **complete** API. There are no other methods, options, or behaviors.
 
@@ -345,7 +345,7 @@ Framework bindings exist as separate packages (see Appendix) but are thin wrappe
 All functions are pure at their boundaries; testing is straightforward:
 
 ```javascript
-import { createStore, derived } from '@grimoire/clavicula';
+import { createStore, derived } from '@grimoire-intel/clavicula';
 
 // Test createStore
 const store = createStore({ x: 1 });
@@ -452,7 +452,7 @@ export function withPersist<T extends object>(
 
 ## File Checklist for Implementation
 
-### @grimoire/clavicula (core)
+### @grimoire-intel/clavicula (core)
 
 - [ ] `index.js` — All exports: createStore, derived, withPersist (~60 lines)
 - [ ] `index.d.ts` — All type declarations
@@ -460,40 +460,40 @@ export function withPersist<T extends object>(
 - [ ] `package.json` — ES modules config
 - [ ] `README.md` — Usage examples, design principles
 
-### @grimoire/clavicula-react
+### @grimoire-intel/clavicula-react
 
 - [ ] `index.js` — useStore hook (~5 lines)
 - [ ] `index.d.ts` — Type declarations
-- [ ] `package.json` — Peer deps: react, @grimoire/clavicula
+- [ ] `package.json` — Peer deps: react, @grimoire-intel/clavicula
 
-### @grimoire/clavicula-vue
+### @grimoire-intel/clavicula-vue
 
 - [ ] `index.js` — useStore composable (~6 lines)
 - [ ] `index.d.ts` — Type declarations
-- [ ] `package.json` — Peer deps: vue, @grimoire/clavicula
+- [ ] `package.json` — Peer deps: vue, @grimoire-intel/clavicula
 
-### @grimoire/clavicula-solid
+### @grimoire-intel/clavicula-solid
 
 - [ ] `index.js` — useStore primitive (~4 lines)
 - [ ] `index.d.ts` — Type declarations
-- [ ] `package.json` — Peer deps: solid-js, @grimoire/clavicula
+- [ ] `package.json` — Peer deps: solid-js, @grimoire-intel/clavicula
 
-### @grimoire/clavicula-angular
+### @grimoire-intel/clavicula-angular
 
 - [ ] `index.js` — toObservable, toSignal (~10 lines)
 - [ ] `index.d.ts` — Type declarations
-- [ ] `package.json` — Peer deps: @angular/core, rxjs, @grimoire/clavicula
+- [ ] `package.json` — Peer deps: @angular/core, rxjs, @grimoire-intel/clavicula
 
 ---
 
 ## Package.json Structures
 
-### @grimoire/clavicula
+### @grimoire-intel/clavicula
 
 ```json
 {
-  "name": "@grimoire/clavicula",
-  "version": "0.1.0",
+  "name": "@grimoire-intel/clavicula",
+  "version": "1.0.0",
   "type": "module",
   "main": "index.js",
   "types": "index.d.ts",
@@ -508,17 +508,17 @@ export function withPersist<T extends object>(
 }
 ```
 
-### @grimoire/clavicula-react
+### @grimoire-intel/clavicula-react
 
 ```json
 {
-  "name": "@grimoire/clavicula-react",
-  "version": "0.1.0",
+  "name": "@grimoire-intel/clavicula-react",
+  "version": "1.0.0",
   "type": "module",
   "main": "index.js",
   "types": "index.d.ts",
   "peerDependencies": {
-    "@grimoire/clavicula": ">=0.1.0",
+    "@grimoire-intel/clavicula": ">=1.0.0",
     "react": ">=18.0.0"
   },
   "files": ["index.js", "index.d.ts"],
@@ -526,17 +526,17 @@ export function withPersist<T extends object>(
 }
 ```
 
-### @grimoire/clavicula-vue
+### @grimoire-intel/clavicula-vue
 
 ```json
 {
-  "name": "@grimoire/clavicula-vue",
-  "version": "0.1.0",
+  "name": "@grimoire-intel/clavicula-vue",
+  "version": "1.0.0",
   "type": "module",
   "main": "index.js",
   "types": "index.d.ts",
   "peerDependencies": {
-    "@grimoire/clavicula": ">=0.1.0",
+    "@grimoire-intel/clavicula": ">=1.0.0",
     "vue": ">=3.0.0"
   },
   "files": ["index.js", "index.d.ts"],
@@ -544,17 +544,17 @@ export function withPersist<T extends object>(
 }
 ```
 
-### @grimoire/clavicula-solid
+### @grimoire-intel/clavicula-solid
 
 ```json
 {
-  "name": "@grimoire/clavicula-solid",
-  "version": "0.1.0",
+  "name": "@grimoire-intel/clavicula-solid",
+  "version": "1.0.0",
   "type": "module",
   "main": "index.js",
   "types": "index.d.ts",
   "peerDependencies": {
-    "@grimoire/clavicula": ">=0.1.0",
+    "@grimoire-intel/clavicula": ">=1.0.0",
     "solid-js": ">=1.0.0"
   },
   "files": ["index.js", "index.d.ts"],
@@ -562,17 +562,17 @@ export function withPersist<T extends object>(
 }
 ```
 
-### @grimoire/clavicula-angular
+### @grimoire-intel/clavicula-angular
 
 ```json
 {
-  "name": "@grimoire/clavicula-angular",
-  "version": "0.1.0",
+  "name": "@grimoire-intel/clavicula-angular",
+  "version": "1.0.0",
   "type": "module",
   "main": "index.js",
   "types": "index.d.ts",
   "peerDependencies": {
-    "@grimoire/clavicula": ">=0.1.0",
+    "@grimoire-intel/clavicula": ">=1.0.0",
     "@angular/core": ">=16.0.0",
     "rxjs": ">=7.0.0"
   },
@@ -587,7 +587,7 @@ export function withPersist<T extends object>(
 
 Each adapter bridges Clavicula's `subscribe` contract to the framework's native reactivity primitive. **Composition before configuration**—these chain existing tools rather than inventing new machinery.
 
-### @grimoire/clavicula-react
+### @grimoire-intel/clavicula-react
 
 Uses React 18's `useSyncExternalStore`—the platform answer for external stores.
 
@@ -605,7 +605,7 @@ export function useStore(store, selector = s => s) {
 
 **index.d.ts:**
 ```typescript
-import type { Store, DerivedStore } from '@grimoire/clavicula';
+import type { Store, DerivedStore } from '@grimoire-intel/clavicula';
 
 export function useStore<T extends object>(store: Store<T>): T;
 export function useStore<T extends object, R>(store: Store<T>, selector: (state: T) => R): R;
@@ -615,7 +615,7 @@ export function useStore<T, R>(store: DerivedStore<T>, selector: (value: T) => R
 
 **Usage:**
 ```jsx
-import { useStore } from '@grimoire/clavicula-react';
+import { useStore } from '@grimoire-intel/clavicula-react';
 import { cartStore } from './stores.js';
 
 function Cart() {
@@ -628,7 +628,7 @@ function Cart() {
 
 ---
 
-### @grimoire/clavicula-vue
+### @grimoire-intel/clavicula-vue
 
 Bridges to Vue's `shallowRef` for reactive bindings.
 
@@ -647,7 +647,7 @@ export function useStore(store, selector = s => s) {
 **index.d.ts:**
 ```typescript
 import type { Ref } from 'vue';
-import type { Store, DerivedStore } from '@grimoire/clavicula';
+import type { Store, DerivedStore } from '@grimoire-intel/clavicula';
 
 export function useStore<T extends object>(store: Store<T>): Ref<T>;
 export function useStore<T extends object, R>(store: Store<T>, selector: (state: T) => R): Ref<R>;
@@ -658,7 +658,7 @@ export function useStore<T, R>(store: DerivedStore<T>, selector: (value: T) => R
 **Usage:**
 ```vue
 <script setup>
-import { useStore } from '@grimoire/clavicula-vue';
+import { useStore } from '@grimoire-intel/clavicula-vue';
 import { cartStore } from './stores.js';
 
 const cart = useStore(cartStore);
@@ -672,7 +672,7 @@ const itemCount = useStore(cartStore, s => s.items.length);
 
 ---
 
-### @grimoire/clavicula-solid
+### @grimoire-intel/clavicula-solid
 
 Bridges to Solid's signals.
 
@@ -690,7 +690,7 @@ export function useStore(store, selector = s => s) {
 **index.d.ts:**
 ```typescript
 import type { Accessor } from 'solid-js';
-import type { Store, DerivedStore } from '@grimoire/clavicula';
+import type { Store, DerivedStore } from '@grimoire-intel/clavicula';
 
 export function useStore<T extends object>(store: Store<T>): Accessor<T>;
 export function useStore<T extends object, R>(store: Store<T>, selector: (state: T) => R): Accessor<R>;
@@ -700,7 +700,7 @@ export function useStore<T, R>(store: DerivedStore<T>, selector: (value: T) => R
 
 **Usage:**
 ```jsx
-import { useStore } from '@grimoire/clavicula-solid';
+import { useStore } from '@grimoire-intel/clavicula-solid';
 import { cartStore } from './stores.js';
 
 function Cart() {
@@ -713,7 +713,7 @@ function Cart() {
 
 ---
 
-### @grimoire/clavicula-angular
+### @grimoire-intel/clavicula-angular
 
 Bridges to RxJS Observable (for templates) and Angular 16+ signals. Angular's DI system means we export functions rather than hooks.
 
@@ -740,7 +740,7 @@ export function toSignal(store) {
 ```typescript
 import type { Observable } from 'rxjs';
 import type { Signal } from '@angular/core';
-import type { Store, DerivedStore } from '@grimoire/clavicula';
+import type { Store, DerivedStore } from '@grimoire-intel/clavicula';
 
 type AnyStore<T> = Store<T> | DerivedStore<T>;
 
@@ -751,7 +751,7 @@ export function toSignal<T>(store: AnyStore<T>): Signal<T>;
 **Usage (Observable + async pipe):**
 ```typescript
 import { Component } from '@angular/core';
-import { toObservable } from '@grimoire/clavicula-angular';
+import { toObservable } from '@grimoire-intel/clavicula-angular';
 import { cartStore } from './stores';
 
 @Component({
@@ -766,7 +766,7 @@ export class CartComponent {
 **Usage (Signal, Angular 16+):**
 ```typescript
 import { Component } from '@angular/core';
-import { toSignal } from '@grimoire/clavicula-angular';
+import { toSignal } from '@grimoire-intel/clavicula-angular';
 import { cartStore } from './stores';
 
 @Component({

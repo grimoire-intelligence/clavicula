@@ -3,8 +3,8 @@
 ## Orchestration Metadata
 
 ```yaml
-project: "@grimoire/clavicula"
-version: "0.1.0"
+project: "@grimoire-intel/clavicula"
+version: "1.0.0"
 total_prs: 12
 parallel_blocks: 4
 ```

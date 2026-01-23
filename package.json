@@ -1,6 +1,6 @@
 {
   "name": "clavicula-monorepo",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
   "description": "Minimalist, AI-native, framework-agnostic reactive Javascript store",
   "workspaces": [
@@ -15,7 +15,7 @@
     "url": "git+https://github.com/grimoire-intelligence/clavicula.git"
   },
   "author": "Grimoire Intelligence",
-  "license": "ISC",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/grimoire-intelligence/clavicula/issues"
   },

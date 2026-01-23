@@ -6,10 +6,10 @@ This document provides a machine-readable API reference for AI assistants workin
 
 ```yaml
 name: clavicula
-version: 0.1.0
+version: 1.0.0
 packages:
-  core: "@grimoire/clavicula"          # ~670 bytes
-  extras: "@grimoire/clavicula-extras" # ~2KB, tree-shakeable
+  core: "@grimoire-intel/clavicula"          # ~670 bytes
+  extras: "@grimoire-intel/clavicula-extras" # ~2KB, tree-shakeable
 category: state-management
 framework: agnostic
 ```
@@ -17,8 +17,8 @@ framework: agnostic
 ## Quick Reference
 
 ```
-CORE:     import { createStore, derived } from '@grimoire/clavicula';
-EXTRAS:   import { withPersist, withBatching, withHistory, ... } from '@grimoire/clavicula-extras';
+CORE:     import { createStore, derived } from '@grimoire-intel/clavicula';
+EXTRAS:   import { withPersist, withBatching, withHistory, ... } from '@grimoire-intel/clavicula-extras';
 STORE:    store.get() | store.set(partial) | store.subscribe(fn) => unsubscribe
 DERIVED:  derivedStore.get() | derivedStore.subscribe(fn) | derivedStore.destroy()
 ```
@@ -249,12 +249,12 @@ derivedStore.destroy(): void
 
 ---
 
-### withPersist (from `@grimoire/clavicula-extras`)
+### withPersist (from `@grimoire-intel/clavicula-extras`)
 
 Syncs store state with localStorage. SSR-safe (no-op if localStorage unavailable).
 
 ```typescript
-import { withPersist } from '@grimoire/clavicula-extras';
+import { withPersist } from '@grimoire-intel/clavicula-extras';
 
 function withPersist<T extends object>(
   store: Store<T>,
@@ -284,12 +284,12 @@ const settings = withPersist(
 
 ---
 
-### withBatching (from `@grimoire/clavicula-extras`)
+### withBatching (from `@grimoire-intel/clavicula-extras`)
 
 Batches multiple synchronous set() calls into a single subscriber notification.
 
 ```typescript
-import { withBatching } from '@grimoire/clavicula-extras';
+import { withBatching } from '@grimoire-intel/clavicula-extras';
 
 function withBatching<T extends object>(store: Store<T>): Store<T>
 ```
@@ -328,7 +328,7 @@ store.set(s => ({ x: s.x + 10 }));
 ### React
 
 ```typescript
-import { useStore } from '@grimoire/clavicula-react';
+import { useStore } from '@grimoire-intel/clavicula-react';
 
 function useStore<T extends object>(store: Store<T>): T;
 function useStore<T extends object, R>(store: Store<T>, selector: (s: T) => R): R;
@@ -346,7 +346,7 @@ function Counter() {
 ### Vue
 
 ```typescript
-import { useStore } from '@grimoire/clavicula-vue';
+import { useStore } from '@grimoire-intel/clavicula-vue';
 
 function useStore<T extends object>(store: Store<T>): Ref<T>;
 function useStore<T extends object, R>(store: Store<T>, selector: (s: T) => R): Ref<R>;
@@ -363,7 +363,7 @@ const state = useStore(countStore);
 ### Solid
 
 ```typescript
-import { useStore } from '@grimoire/clavicula-solid';
+import { useStore } from '@grimoire-intel/clavicula-solid';
 
 function useStore<T extends object>(store: Store<T>): Accessor<T>;
 ```
@@ -379,7 +379,7 @@ function Counter() {
 ### Angular
 
 ```typescript
-import { toObservable, toSignal } from '@grimoire/clavicula-angular';
+import { toObservable, toSignal } from '@grimoire-intel/clavicula-angular';
 
 function toObservable<T>(store: Store<T>): Observable<T>;
 function toSignal<T>(store: Store<T>): { signal: Signal<T>; destroy: () => void };
@@ -413,7 +413,7 @@ import { countStore } from './stores.js';
 
 ```javascript
 // stores/counter.js
-import { createStore } from '@grimoire/clavicula';
+import { createStore } from '@grimoire-intel/clavicula';
 
 export const counterStore = createStore({ count: 0 });
 
@@ -429,8 +429,8 @@ export function decrement() {
 ### Pattern: Persisted Settings
 
 ```javascript
-import { createStore } from '@grimoire/clavicula';
-import { withPersist } from '@grimoire/clavicula-extras';
+import { createStore } from '@grimoire-intel/clavicula';
+import { withPersist } from '@grimoire-intel/clavicula-extras';
 
 export const settingsStore = withPersist(
   createStore({
@@ -445,7 +445,7 @@ export const settingsStore = withPersist(
 ### Pattern: Derived Computations
 
 ```javascript
-import { createStore, derived } from '@grimoire/clavicula';
+import { createStore, derived } from '@grimoire-intel/clavicula';
 
 const cartStore = createStore({ items: [], coupon: null });
 
@@ -548,7 +548,7 @@ const count = derived(store, s => s.items.length); // Primitive
 ### Mistake: Using withPersist with Sensitive Data
 
 ```javascript
-import { withPersist } from '@grimoire/clavicula-extras';
+import { withPersist } from '@grimoire-intel/clavicula-extras';
 
 // WRONG: Tokens in localStorage are XSS-vulnerable
 const authStore = withPersist(createStore({ token: '...' }), 'auth');
@@ -630,7 +630,7 @@ disconnectedCallback() {
 
 ## Type Definitions Summary
 
-### Core (`@grimoire/clavicula`)
+### Core (`@grimoire-intel/clavicula`)
 
 ```typescript
 interface Store<T extends object> {
@@ -654,7 +654,7 @@ function derived<S extends unknown[], T>(
 ): DerivedStore<T>;
 ```
 
-### Extras (`@grimoire/clavicula-extras`)
+### Extras (`@grimoire-intel/clavicula-extras`)
 
 ```typescript
 function withPersist<T extends object>(store: Store<T>, key: string): Store<T>;
@@ -683,7 +683,7 @@ function withHistory<T extends object>(store: Store<T>, maxSize?: number): Store
 5. `derived(stores, fn)` - create computed store
 6. `derivedStore.destroy()` - cleanup derived
 
-### Extras (import from `@grimoire/clavicula-extras`)
+### Extras (import from `@grimoire-intel/clavicula-extras`)
 
 - `withPersist(store, key)` - localStorage sync
 - `withBatching(store, isEqual?)` - batch updates with equality filtering

@@ -10,9 +10,9 @@
  *   withPersist(withBatching(createStore(...)), 'key')
  * This ensures persistence only triggers on batched, deduplicated changes.
  *
- * @param {import('@grimoire/clavicula').Store} store - The store to persist
+ * @param {import('@grimoire-intel/clavicula').Store} store - The store to persist
  * @param {string} key - localStorage key
- * @returns {import('@grimoire/clavicula').Store} The same store (mutated to add persistence)
+ * @returns {import('@grimoire-intel/clavicula').Store} The same store (mutated to add persistence)
  */
 export function withPersist(store, key) {
   if (typeof localStorage === 'undefined') return store;
@@ -55,9 +55,9 @@ function shallowEqual(a, b) {
  * Decorator that batches multiple synchronous set() calls into a single notification.
  * Also filters out no-op updates via equality checking (like derived() does).
  * Useful for vanilla JS and Svelte; React/Vue/Solid handle their own batching.
- * @param {import('@grimoire/clavicula').Store} store - The store to wrap
+ * @param {import('@grimoire-intel/clavicula').Store} store - The store to wrap
  * @param {function} [isEqual=shallowEqual] - Equality function; pass () => false to disable filtering
- * @returns {import('@grimoire/clavicula').Store} A new store with batched, distinct updates
+ * @returns {import('@grimoire-intel/clavicula').Store} A new store with batched, distinct updates
  */
 export function withBatching(store, isEqual = shallowEqual) {
   let batching = false;
@@ -95,8 +95,8 @@ export function withBatching(store, isEqual = shallowEqual) {
 /**
  * In development: deeply freezes state after every set() to catch mutations.
  * In production: identity function (no-op).
- * @param {import('@grimoire/clavicula').Store} store - The store to wrap
- * @returns {import('@grimoire/clavicula').Store} A new store that freezes state (dev only)
+ * @param {import('@grimoire-intel/clavicula').Store} store - The store to wrap
+ * @returns {import('@grimoire-intel/clavicula').Store} A new store that freezes state (dev only)
  */
 export function withFreeze(store) {
   if (typeof process === 'undefined' || process.env.NODE_ENV === 'production') {
@@ -128,8 +128,8 @@ export function withFreeze(store) {
 
 /**
  * Decorator that adds a reset() method to restore initial state.
- * @param {import('@grimoire/clavicula').Store} store - The store to wrap
- * @returns {import('@grimoire/clavicula').Store & { reset: () => void }} Store with reset method
+ * @param {import('@grimoire-intel/clavicula').Store} store - The store to wrap
+ * @returns {import('@grimoire-intel/clavicula').Store & { reset: () => void }} Store with reset method
  */
 export function withReset(store) {
   const initial = { ...store.get() };
@@ -148,9 +148,9 @@ export function withReset(store) {
 
 /**
  * Decorator that logs state changes to console.
- * @param {import('@grimoire/clavicula').Store} store - The store to log
+ * @param {import('@grimoire-intel/clavicula').Store} store - The store to log
  * @param {string} [label='store'] - Label for log messages
- * @returns {import('@grimoire/clavicula').Store} The same store
+ * @returns {import('@grimoire-intel/clavicula').Store} The same store
  */
 export function withLogging(store, label = 'store') {
   store.subscribe(state => {
@@ -165,9 +165,9 @@ export function withLogging(store, label = 'store') {
 
 /**
  * Decorator that adds undo/redo capability to a store.
- * @param {import('@grimoire/clavicula').Store} store - The store to wrap
+ * @param {import('@grimoire-intel/clavicula').Store} store - The store to wrap
  * @param {number} [maxSize=50] - Maximum history size
- * @returns {import('@grimoire/clavicula').Store & { undo: () => void, redo: () => void, canUndo: () => boolean, canRedo: () => boolean }}
+ * @returns {import('@grimoire-intel/clavicula').Store & { undo: () => void, redo: () => void, canUndo: () => boolean, canRedo: () => boolean }}
  */
 export function withHistory(store, maxSize = 50) {
   let past = [];

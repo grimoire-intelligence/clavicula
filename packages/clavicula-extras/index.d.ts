@@ -1,4 +1,4 @@
-import type { Store } from '@grimoire/clavicula';
+import type { Store } from '@grimoire-intel/clavicula';
 
 // ─────────────────────────────────────────────────────────────
 // withPersist

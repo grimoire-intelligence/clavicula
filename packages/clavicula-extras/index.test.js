@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { createStore } from '@grimoire/clavicula';
+import { createStore } from '@grimoire-intel/clavicula';
 import {
   withPersist,
   withBatching,

@@ -12,5 +12,8 @@
   },
   "files": ["index.js", "index.d.ts"],
   "sideEffects": false,
+  "peerDependencies": {
+    "@grimoire-intel/clavicula": ">=1.0.0"
+  },
   "license": "MIT"
 }

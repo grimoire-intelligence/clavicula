@@ -1,4 +1,4 @@
-import type { Store, DerivedStore } from 'clavicula';
+import type { Store, DerivedStore } from '@grimoire-intel/clavicula';
 
 /**
  * React hook to subscribe to a Clavicula store.

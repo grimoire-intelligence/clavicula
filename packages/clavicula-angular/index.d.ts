@@ -1,4 +1,4 @@
-import type { Store, DerivedStore } from 'clavicula';
+import type { Store, DerivedStore } from '@grimoire-intel/clavicula';
 import type { Observable } from 'rxjs';
 import type { Signal } from '@angular/core';
 

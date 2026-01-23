@@ -41,6 +41,13 @@ store.set({ x: 10 });
 // Subscribers see: { x: 10, y: 2 }
 ```
 
+**Note:** React, Vue, Solid, and Angular batch renders internally, so `withBatching` provides less visible benefit for rendering. However, it's still valuable for:
+- Reducing notification overhead (N calls → 1 notification)
+- Filtering no-op updates via equality checking
+- Protecting `withPersist` from excessive localStorage writes
+
+Most useful for vanilla JS, Svelte, and when composing with `withPersist`.
+
 ### withHistory
 
 Adds undo/redo capability.

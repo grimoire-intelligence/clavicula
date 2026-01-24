@@ -5,7 +5,7 @@ A minimal reactive state management library (~1KB) built on native EventTarget.
 ## Installation
 
 ```bash
-npm install clavicula
+npm install @grimoire-intel/clavicula
 ```
 
 ## Usage
@@ -13,7 +13,7 @@ npm install clavicula
 ### Basic Store
 
 ```js
-import { createStore } from 'clavicula';
+import { createStore } from '@grimoire-intel/clavicula';
 
 const store = createStore({ count: 0, name: 'Alice' });
 
@@ -40,7 +40,7 @@ unsubscribe();
 Create computed values from one or more stores:
 
 ```js
-import { createStore, derived } from 'clavicula';
+import { createStore, derived } from '@grimoire-intel/clavicula';
 
 const store = createStore({ items: [], filter: 'all' });
 
@@ -69,7 +69,7 @@ Derived stores batch multiple synchronous source updates into a single recomputa
 Sync store state with localStorage:
 
 ```js
-import { createStore, withPersist } from 'clavicula';
+import { createStore, withPersist } from '@grimoire-intel/clavicula';
 
 const store = withPersist(
   createStore({ theme: 'light', lang: 'en' }),
@@ -84,16 +84,16 @@ const store = withPersist(
 
 | Package | Framework | Hook/Function |
 |---------|-----------|---------------|
-| `clavicula-react` | React 18+ | `useStore(store)` |
-| `clavicula-vue` | Vue 3 | `useStore(store)` |
-| `clavicula-solid` | Solid | `useStore(store)` |
-| `clavicula-angular` | Angular 16+ | `toObservable(store)`, `toSignal(store)` |
+| `@grimoire-intel/clavicula-react` | React 18+ | `useStore(store)` |
+| `@grimoire-intel/clavicula-vue` | Vue 3 | `useStore(store)` |
+| `@grimoire-intel/clavicula-solid` | Solid | `useStore(store)` |
+| `@grimoire-intel/clavicula-angular` | Angular 16+ | `toObservable(store)`, `toSignal(store)` |
 
 ### React
 
 ```jsx
-import { createStore } from 'clavicula';
-import { useStore } from 'clavicula-react';
+import { createStore } from '@grimoire-intel/clavicula';
+import { useStore } from '@grimoire-intel/clavicula-react';
 
 const countStore = createStore({ count: 0 });
 
@@ -107,8 +107,8 @@ function Counter() {
 
 ```vue
 <script setup>
-import { createStore } from 'clavicula';
-import { useStore } from 'clavicula-vue';
+import { createStore } from '@grimoire-intel/clavicula';
+import { useStore } from '@grimoire-intel/clavicula-vue';
 
 const countStore = createStore({ count: 0 });
 const state = useStore(countStore);
@@ -122,8 +122,8 @@ const state = useStore(countStore);
 ### Solid
 
 ```jsx
-import { createStore } from 'clavicula';
-import { useStore } from 'clavicula-solid';
+import { createStore } from '@grimoire-intel/clavicula';
+import { useStore } from '@grimoire-intel/clavicula-solid';
 
 const countStore = createStore({ count: 0 });
 
@@ -137,8 +137,8 @@ function Counter() {
 
 ```typescript
 import { Component, computed } from '@angular/core';
-import { createStore } from 'clavicula';
-import { toSignal } from 'clavicula-angular';
+import { createStore } from '@grimoire-intel/clavicula';
+import { toSignal } from '@grimoire-intel/clavicula-angular';
 
 const countStore = createStore({ count: 0 });
 

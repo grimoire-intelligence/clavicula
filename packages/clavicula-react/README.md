@@ -11,8 +11,7 @@ npm install @grimoire-intel/clavicula @grimoire-intel/clavicula-react
 ## Usage
 
 ```jsx
-import { createStore } from '@grimoire-intel/clavicula';
-import { useStore } from '@grimoire-intel/clavicula-react';
+import { createStore, useStore } from '@grimoire-intel/clavicula-react';
 
 const counterStore = createStore({ count: 0 });
 
@@ -37,8 +36,9 @@ const count = useStore(counterStore, s => s.count);
 ### With derived stores
 
 ```jsx
-import { derived } from '@grimoire-intel/clavicula';
+import { createStore, derived, useStore } from '@grimoire-intel/clavicula-react';
 
+const counterStore = createStore({ count: 0 });
 const doubled = derived(counterStore, s => s.count * 2);
 
 function Doubled() {

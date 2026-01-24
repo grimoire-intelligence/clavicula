@@ -11,8 +11,7 @@ npm install @grimoire-intel/clavicula @grimoire-intel/clavicula-solid
 ## Usage
 
 ```jsx
-import { createStore } from '@grimoire-intel/clavicula';
-import { useStore } from '@grimoire-intel/clavicula-solid';
+import { createStore, useStore } from '@grimoire-intel/clavicula-solid';
 
 const counterStore = createStore({ count: 0 });
 

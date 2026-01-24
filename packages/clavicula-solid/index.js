@@ -1,3 +1,4 @@
+export * from '@grimoire-intel/clavicula';
 import { createSignal, onCleanup } from 'solid-js';
 
 /**

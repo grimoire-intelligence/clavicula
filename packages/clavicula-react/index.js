@@ -1,3 +1,4 @@
+export * from '@grimoire-intel/clavicula';
 import { useSyncExternalStore } from 'react';
 
 /**

@@ -12,8 +12,7 @@ npm install @grimoire-intel/clavicula @grimoire-intel/clavicula-vue
 
 ```vue
 <script setup>
-import { createStore } from '@grimoire-intel/clavicula';
-import { useStore } from '@grimoire-intel/clavicula-vue';
+import { createStore, useStore } from '@grimoire-intel/clavicula-vue';
 
 const counterStore = createStore({ count: 0 });
 const state = useStore(counterStore);

@@ -14,8 +14,7 @@ npm install @grimoire-intel/clavicula @grimoire-intel/clavicula-angular
 
 ```typescript
 import { Component } from '@angular/core';
-import { createStore } from '@grimoire-intel/clavicula';
-import { toObservable } from '@grimoire-intel/clavicula-angular';
+import { createStore, toObservable } from '@grimoire-intel/clavicula-angular';
 
 const counterStore = createStore({ count: 0 });
 
@@ -40,7 +39,9 @@ export class CounterComponent {
 
 ```typescript
 import { Component, OnDestroy } from '@angular/core';
-import { toSignal } from '@grimoire-intel/clavicula-angular';
+import { createStore, toSignal } from '@grimoire-intel/clavicula-angular';
+
+const counterStore = createStore({ count: 0 });
 
 @Component({
   selector: 'app-counter',

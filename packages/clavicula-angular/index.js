@@ -1,3 +1,4 @@
+export * from '@grimoire-intel/clavicula';
 import { Observable } from 'rxjs';
 import { signal } from '@angular/core';
 

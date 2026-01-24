@@ -1,3 +1,4 @@
+export * from '@grimoire-intel/clavicula';
 import type { Store, DerivedStore } from '@grimoire-intel/clavicula';
 import type { Accessor } from 'solid-js';
 

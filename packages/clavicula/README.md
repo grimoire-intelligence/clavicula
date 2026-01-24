@@ -64,22 +64,6 @@ total.destroy();
 
 Derived stores batch multiple synchronous source updates into a single recomputation, and only notify subscribers when the computed value actually changes (using `Object.is` comparison).
 
-### Persistence
-
-Sync store state with localStorage:
-
-```js
-import { createStore, withPersist } from '@grimoire-intel/clavicula';
-
-const store = withPersist(
-  createStore({ theme: 'light', lang: 'en' }),
-  'user-prefs'
-);
-
-// State is loaded from localStorage on creation
-// and saved automatically on every change
-```
-
 ## Framework Adapters
 
 | Package | Framework | Hook/Function |
@@ -92,8 +76,7 @@ const store = withPersist(
 ### React
 
 ```jsx
-import { createStore } from '@grimoire-intel/clavicula';
-import { useStore } from '@grimoire-intel/clavicula-react';
+import { createStore, useStore } from '@grimoire-intel/clavicula-react';
 
 const countStore = createStore({ count: 0 });
 
@@ -107,8 +90,7 @@ function Counter() {
 
 ```vue
 <script setup>
-import { createStore } from '@grimoire-intel/clavicula';
-import { useStore } from '@grimoire-intel/clavicula-vue';
+import { createStore, useStore } from '@grimoire-intel/clavicula-vue';
 
 const countStore = createStore({ count: 0 });
 const state = useStore(countStore);
@@ -122,8 +104,7 @@ const state = useStore(countStore);
 ### Solid
 
 ```jsx
-import { createStore } from '@grimoire-intel/clavicula';
-import { useStore } from '@grimoire-intel/clavicula-solid';
+import { createStore, useStore } from '@grimoire-intel/clavicula-solid';
 
 const countStore = createStore({ count: 0 });
 
@@ -137,8 +118,7 @@ function Counter() {
 
 ```typescript
 import { Component, computed } from '@angular/core';
-import { createStore } from '@grimoire-intel/clavicula';
-import { toSignal } from '@grimoire-intel/clavicula-angular';
+import { createStore, toSignal } from '@grimoire-intel/clavicula-angular';
 
 const countStore = createStore({ count: 0 });
 
@@ -176,10 +156,6 @@ Creates a read-only computed store.
 - `get(): T` - Returns current derived value
 - `subscribe(fn): unsubscribe` - Listen to changes
 - `destroy()` - Clean up subscriptions
-
-### `withPersist(store, key): Store<T>`
-
-Adds localStorage persistence to a store.
 
 ## License
 

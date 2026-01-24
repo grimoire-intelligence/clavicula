@@ -1,6 +1,6 @@
 {
   "name": "@grimoire-intel/clavicula-react",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "type": "module",
   "main": "index.js",
   "types": "index.d.ts",

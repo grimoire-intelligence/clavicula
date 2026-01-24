@@ -202,7 +202,7 @@ This pushes complexity to where it's explicit and debuggable.
 | Solid adapter | ~140 bytes |
 | Angular adapter | ~270 bytes |
 
-Total core + one adapter: **~860 bytes**
+Framework adapters re-export core, so a single import gets you everything: **~860 bytes** (React).
 
 Extras are tree-shakeable—import only what you need.
 

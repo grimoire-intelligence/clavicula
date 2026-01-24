@@ -6,22 +6,35 @@ This document provides a machine-readable API reference for AI assistants workin
 
 ```yaml
 name: clavicula
-version: 1.0.0
+version: 1.0.2
 packages:
-  core: "@grimoire-intel/clavicula"          # ~670 bytes
-  extras: "@grimoire-intel/clavicula-extras" # ~2KB, tree-shakeable
+  core: "@grimoire-intel/clavicula"           # ~670 bytes (vanilla JS)
+  react: "@grimoire-intel/clavicula-react"    # re-exports core + useStore
+  vue: "@grimoire-intel/clavicula-vue"        # re-exports core + useStore
+  solid: "@grimoire-intel/clavicula-solid"    # re-exports core + useStore
+  angular: "@grimoire-intel/clavicula-angular" # re-exports core + toSignal/toObservable
+  extras: "@grimoire-intel/clavicula-extras"  # ~2KB, tree-shakeable decorators
 category: state-management
 framework: agnostic
 ```
 
+**Import strategy:** Use your framework's adapter package for store functionality (it re-exports core). Add extras only if you need decorators. Maximum two imports.
+
 ## Quick Reference
 
 ```
-CORE:     import { createStore, derived } from '@grimoire-intel/clavicula';
+VANILLA:  import { createStore, derived } from '@grimoire-intel/clavicula';
+REACT:    import { createStore, derived, useStore } from '@grimoire-intel/clavicula-react';
+VUE:      import { createStore, derived, useStore } from '@grimoire-intel/clavicula-vue';
+SOLID:    import { createStore, derived, useStore } from '@grimoire-intel/clavicula-solid';
+ANGULAR:  import { createStore, derived, toSignal, toObservable } from '@grimoire-intel/clavicula-angular';
 EXTRAS:   import { withPersist, withBatching, withHistory, ... } from '@grimoire-intel/clavicula-extras';
+
 STORE:    store.get() | store.set(partial) | store.subscribe(fn) => unsubscribe
 DERIVED:  derivedStore.get() | derivedStore.subscribe(fn) | derivedStore.destroy()
 ```
+
+Framework adapters re-export all of core, so you only need one import for store functionality (plus extras if needed).
 
 ---
 
@@ -325,10 +338,12 @@ store.set(s => ({ x: s.x + 10 }));
 
 ## Framework Adapters
 
+Framework adapters re-export all of `@grimoire-intel/clavicula`, so you only need one import.
+
 ### React
 
 ```typescript
-import { useStore } from '@grimoire-intel/clavicula-react';
+import { createStore, derived, useStore } from '@grimoire-intel/clavicula-react';
 
 function useStore<T extends object>(store: Store<T>): T;
 function useStore<T extends object, R>(store: Store<T>, selector: (s: T) => R): R;
@@ -336,9 +351,12 @@ function useStore<T extends object, R>(store: Store<T>, selector: (s: T) => R): 
 
 **Example:**
 ```jsx
+import { createStore, useStore } from '@grimoire-intel/clavicula-react';
+
+const countStore = createStore({ count: 0 });
+
 function Counter() {
-  const state = useStore(countStore);
-  const count = useStore(countStore, s => s.count);
+  const { count } = useStore(countStore);
   return <span>{count}</span>;
 }
 ```
@@ -346,7 +364,7 @@ function Counter() {
 ### Vue
 
 ```typescript
-import { useStore } from '@grimoire-intel/clavicula-vue';
+import { createStore, derived, useStore } from '@grimoire-intel/clavicula-vue';
 
 function useStore<T extends object>(store: Store<T>): Ref<T>;
 function useStore<T extends object, R>(store: Store<T>, selector: (s: T) => R): Ref<R>;
@@ -355,6 +373,9 @@ function useStore<T extends object, R>(store: Store<T>, selector: (s: T) => R): 
 **Example:**
 ```vue
 <script setup>
+import { createStore, useStore } from '@grimoire-intel/clavicula-vue';
+
+const countStore = createStore({ count: 0 });
 const state = useStore(countStore);
 </script>
 <template>{{ state.count }}</template>
@@ -363,13 +384,17 @@ const state = useStore(countStore);
 ### Solid
 
 ```typescript
-import { useStore } from '@grimoire-intel/clavicula-solid';
+import { createStore, derived, useStore } from '@grimoire-intel/clavicula-solid';
 
 function useStore<T extends object>(store: Store<T>): Accessor<T>;
 ```
 
 **Example:**
 ```jsx
+import { createStore, useStore } from '@grimoire-intel/clavicula-solid';
+
+const countStore = createStore({ count: 0 });
+
 function Counter() {
   const state = useStore(countStore);
   return <span>{state().count}</span>;
@@ -379,7 +404,7 @@ function Counter() {
 ### Angular
 
 ```typescript
-import { toObservable, toSignal } from '@grimoire-intel/clavicula-angular';
+import { createStore, derived, toObservable, toSignal } from '@grimoire-intel/clavicula-angular';
 
 function toObservable<T>(store: Store<T>): Observable<T>;
 function toSignal<T>(store: Store<T>): { signal: Signal<T>; destroy: () => void };
@@ -387,6 +412,10 @@ function toSignal<T>(store: Store<T>): { signal: Signal<T>; destroy: () => void 
 
 **Example:**
 ```typescript
+import { createStore, toSignal } from '@grimoire-intel/clavicula-angular';
+
+const countStore = createStore({ count: 0 });
+
 @Component({ template: `{{ state.signal().count }}` })
 export class Counter {
   state = toSignal(countStore);
@@ -400,7 +429,9 @@ No adapter needed. Use stores directly with `$` prefix.
 
 ```svelte
 <script>
-import { countStore } from './stores.js';
+import { createStore } from '@grimoire-intel/clavicula';
+
+const countStore = createStore({ count: 0 });
 </script>
 {$countStore.count}
 ```
@@ -409,11 +440,11 @@ import { countStore } from './stores.js';
 
 ## Common Patterns
 
-### Pattern: Global Store Module
+### Pattern: Global Store Module (React)
 
 ```javascript
 // stores/counter.js
-import { createStore } from '@grimoire-intel/clavicula';
+import { createStore } from '@grimoire-intel/clavicula-react';
 
 export const counterStore = createStore({ count: 0 });
 
@@ -429,15 +460,16 @@ export function decrement() {
 ### Pattern: Persisted Settings
 
 ```javascript
-import { createStore } from '@grimoire-intel/clavicula';
-import { withPersist } from '@grimoire-intel/clavicula-extras';
+// Use your framework's adapter for createStore, extras for decorators
+import { createStore } from '@grimoire-intel/clavicula-react';
+import { withPersist, withBatching } from '@grimoire-intel/clavicula-extras';
 
 export const settingsStore = withPersist(
-  createStore({
+  withBatching(createStore({
     theme: 'system',
     language: 'en',
     notifications: true
-  }),
+  })),
   'app-settings'
 );
 ```
@@ -445,7 +477,7 @@ export const settingsStore = withPersist(
 ### Pattern: Derived Computations
 
 ```javascript
-import { createStore, derived } from '@grimoire-intel/clavicula';
+import { createStore, derived } from '@grimoire-intel/clavicula-react';
 
 const cartStore = createStore({ items: [], coupon: null });
 
@@ -459,6 +491,8 @@ export const cartSummary = derived(cartStore, state => ({
 ### Pattern: Multi-Store Derived
 
 ```javascript
+import { createStore, derived } from '@grimoire-intel/clavicula-react';
+
 const userStore = createStore({ id: null, tier: 'free' });
 const cartStore = createStore({ items: [] });
 
